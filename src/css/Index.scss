@@ -1,0 +1,162 @@
+$transitionTime: .1s ease;
+$menuWidth: 300px;
+$topMenuHeight:45px;
+$boxShadow: 0px 0px 4px 3px rgba(0, 0, 0, 0.05);
+:root{
+    --main-color:rgb(3,97,236);
+    --secondary-color:rgb(121, 121, 121);
+    --menu-backcolor:rgb(254,254,254);
+    --stack-background:rgb(238,238,238);
+    --text-color:rgb(26, 26, 26);
+    --paper-backcolor:var(--menu-backcolor)
+}
+#root.dark{
+    --main-color: rgb(3,97,236);
+    --menu-backcolor: rgb(34 34 34);
+    --stack-background: rgb(76 76 76);
+    --text-color: rgb(199 199 199);
+}
+html,body{
+    margin: 0;
+    font-family: Arial;
+    color: var(--text-color);
+}
+.Icon{
+    display: inline;
+    .maincolor-stroke{
+        stroke: var(--text-color);
+    }
+    .maincolor-fill{
+        fill: var(--text-color);
+    }
+    .background-stroke{
+        stroke: var(--menu-backcolor);
+    }
+}
+.Sidemenu,.Topmenu{
+    position: fixed;
+    box-shadow: $boxShadow;
+    z-index: 1000;
+}
+.Sidemenu{
+    height: 100vh;
+    width: $menuWidth;
+    background-color: var(--menu-backcolor);
+    z-index: 1200;
+}
+.tabs{
+    width: 100%;
+    height: $topMenuHeight;
+    display: flex;
+    .Tab{
+        flex: 30;
+        display: inherit;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        span{
+            font-weight: 600;
+            text-transform:capitalize;
+            font-size: 13pt;
+        }
+        transition: all $transitionTime;
+        &.active{
+            border-bottom: 2px solid var(--main-color);
+            color:var(--main-color);
+        }
+        &:hover{
+            color:var(--main-color)
+        }
+    }
+    
+}
+.Topmenu{
+    height: $topMenuHeight;
+    width: calc(100% - #{$menuWidth});
+    left: $menuWidth;
+    background-color: var(--menu-backcolor);
+    position: fixed;
+    display: flex;
+    justify-content: space-between;
+    .templateTools,.appTools{
+       display: flex; 
+    }
+    .Topbutton{
+        height: $topMenuHeight;
+        width: $topMenuHeight;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        &:hover{
+            cursor: pointer;
+            
+            .maincolor-stroke{
+                stroke: var(--main-color);
+            }
+            .maincolor-fill{
+                fill: var(--main-color);
+            }
+            .topbutton-language{
+                color:var(--main-color);
+            }
+        }
+        &.disabled{
+            cursor: default;
+            .maincolor-stroke{
+                stroke: var(--secondary-color);
+            }
+            .maincolor-fill{
+                fill: var(--secondary-color);
+            }
+            .topbutton-language{
+                color:var(--secondary-color);
+            }
+        }
+        .topbutton-language{
+            font-weight: 600;
+            text-transform:uppercase;
+        } 
+    }
+}
+.Stack{
+    background-color: var(--stack-background);
+    width: calc(100% - #{$menuWidth});
+    height: calc(100vh - #{$topMenuHeight});
+    top:$topMenuHeight;
+    left:$menuWidth;
+    position: fixed;
+    overflow: auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-content: start;
+    .PageWrapper{
+        transition: all $transitionTime;
+        height: var(--page-wrapper-height);
+        width: var(--page-wrapper-width);
+        min-width: var(--page-wrapper-width);
+        margin-top: calc(1cm * var(--zoom));
+        margin-left: calc(1cm * var(--zoom) );
+        --page-margin-left:calc(1cm * var(--zoom));
+        --page-margin-right:var(--page-margin-left);
+        --page-margin-top:var(--page-margin-left);
+        --page-margin-bottom:var(--page-margin-left);
+        overflow: hidden;
+        box-shadow: $boxShadow;
+    }
+    .PageInner{
+        width: calc(100% - var(--page-margin-left) - var(--page-margin-right));
+        height: calc(100% - var(--page-margin-top) - var(--page-margin-bottom));
+        padding-left: var(--page-margin-left);
+        padding-right: var(--page-margin-right);
+        padding-top: var(--page-margin-top);
+        padding-bottom: var(--page-margin-bottom);
+        background-color: var(--paper-backcolor);
+        word-break: break-all;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        // font-family: 'Times New Roman',;
+        font-size: calc(200px * var(--zoom));
+    }
+}
