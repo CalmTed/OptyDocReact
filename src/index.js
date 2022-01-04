@@ -17,7 +17,7 @@ document.onkeydown = (e)=>{
             return 5;
         }else if(zoomIs<200){
             return 10;
-        }else{
+        }else {
             return 25;
         }
     }

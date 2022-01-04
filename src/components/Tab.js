@@ -5,14 +5,14 @@ function Tab(props) {
 
     const getClasses = ()=>{
         let classes = 'Tab ';
-        if(state.app.tabSelected == props.tabName){
+        if(state.app.tabSelected == props.tabValue){
             classes += 'active ';
         }
         if(state.app.tabSelected)
         return classes
     }
     const handleClick = ()=>{
-        props.store.dispatch({type:"menu/tabSet",payload:props.tabName})
+        props.store.dispatch({type:"menu/tabSet",payload:props.tabValue})
     }
     return (
     <div className={getClasses()} onClick={handleClick}>

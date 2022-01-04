@@ -1,11 +1,27 @@
 import React from 'react'
 
 function Stack(props) {
-    const zoom = props.store.getState().template.zoom;
-    const setZoom = (zoom)=>{
+    const stateNow = props.store.getState();
+    const zoom = stateNow.template.zoom;
+    const setSize = (zoom)=>{
         document.documentElement.style.setProperty('--zoom',zoom/100);
-        document.documentElement.style.setProperty('--page-wrapper-height',(297/100*zoom)+'mm');
-        document.documentElement.style.setProperty('--page-wrapper-width',(210/100*zoom)+'mm');
+        let pageWidth = 210;
+        let pageHeight = 297;
+        if(stateNow.template.pageSize == 'A4'){
+            if(stateNow.template.pageOrientation == 'landscape'){
+                pageWidth = pageHeight;
+                pageHeight = 210;
+            }
+        }else if(stateNow.template.pageSize == 'A3'){
+            pageWidth = 297;
+            pageHeight = 420;
+            if(stateNow.template.pageOrientation == 'landscape'){
+                pageWidth = pageHeight;
+                pageHeight = 297;
+            }
+        }
+        document.documentElement.style.setProperty('--page-wrapper-height',(pageHeight/100*zoom)+'mm');
+        document.documentElement.style.setProperty('--page-wrapper-width',(pageWidth/100*zoom)+'mm');
     }
 
     const generatePages = ()=>{
@@ -15,7 +31,7 @@ function Stack(props) {
         //block can't be heighter then a page
         
         let ret = [];
-        setZoom(zoom);
+        setSize(zoom);
         for(let i=1;i<=70;i++){
             ret.push(<div key={i} className='PageWrapper'><div className='PageInner'>{i}</div></div>)
         }

@@ -7,7 +7,9 @@ const getinitialState = () => {
             dateEdited:'0',
             creator:'man',
             pageSize:'A4',
-            pageOrientation:'landscape',
+            pageSizeOptions:[['A4','A4'],['A3','A3']],
+            pageOrientation:'portrait',
+            pageOrientationOptions:[['Portrait','portrait'],['Landscape','landscape']],
             zoom:100
         }  
       }else{
@@ -25,6 +27,15 @@ const templateReducer = (state = getinitialState(), action)=>{
                 action.payload=1;
             }
             return {...state,zoom:action.payload}
+        case 'template/nameSet':
+            //TODO check length
+            return {...state,name:action.payload}
+        case 'template/pageSizeSet':
+            //TODO validate payload
+            return {...state,pageSize:action.payload}
+        case 'template/pageOrientationSet':
+            //TODO validate payload
+            return {...state,pageOrientation:action.payload}
         default:
             return state
     }

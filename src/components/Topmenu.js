@@ -17,7 +17,7 @@ function Topmenu(props) {
           <Topbutton name='newTemplate' store={props.store}></Topbutton>
           <Topbutton disabled name='exportTemplate' store={props.store}></Topbutton>
           <Topbutton disabled name='language' store={props.store}></Topbutton>
-          <Topbutton disabled name='settings' store={props.store}></Topbutton>
+          <Topbutton name='settings' store={props.store}></Topbutton>
         </div>
     </div>
   );

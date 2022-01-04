@@ -1,25 +1,20 @@
-$transitionTime: .1s ease;
+$transitionTime: .15s ease;
 $menuWidth: 300px;
 $topMenuHeight:45px;
 $boxShadow: 0px 0px 4px 3px rgba(0, 0, 0, 0.05);
-:root{
-    --main-color:rgb(3,97,236);
-    --secondary-color:rgb(121, 121, 121);
-    --menu-backcolor:rgb(254,254,254);
-    --stack-background:rgb(238,238,238);
-    --text-color:rgb(26, 26, 26);
-    --paper-backcolor:var(--menu-backcolor)
-}
-#root.dark{
-    --main-color: rgb(3,97,236);
-    --menu-backcolor: rgb(34 34 34);
-    --stack-background: rgb(76 76 76);
-    --text-color: rgb(199 199 199);
-}
+
 html,body{
     margin: 0;
     font-family: Arial;
-    color: var(--text-color);
+}
+*::-webkit-scrollbar {
+    width: 7px;
+    background-color: transparent;
+  } 
+*::-webkit-scrollbar-thumb {
+border-radius: 5px;
+background-color: var(--secondary-color);
+border: 1px solid transparent;
 }
 .Icon{
     display: inline;
@@ -33,6 +28,22 @@ html,body{
         stroke: var(--menu-backcolor);
     }
 }
+.Page{
+    --main-color:rgb(3,97,236);
+    --secondary-color:rgb(121, 121, 121);
+    --menu-backcolor:rgb(254,254,254);
+    --stack-background:rgb(238,238,238);
+    --text-color:rgb(26, 26, 26);
+    --paper-backcolor:var(--menu-backcolor);
+
+    color: var(--text-color);
+}
+.Page.dark{
+    --main-color: rgb(3,97,236);
+    --menu-backcolor: rgb(34 34 34);
+    --stack-background: rgb(76 76 76);
+    --text-color: rgb(199 199 199);
+}
 .Sidemenu,.Topmenu{
     position: fixed;
     box-shadow: $boxShadow;
@@ -43,32 +54,62 @@ html,body{
     width: $menuWidth;
     background-color: var(--menu-backcolor);
     z-index: 1200;
-}
-.tabs{
-    width: 100%;
-    height: $topMenuHeight;
-    display: flex;
-    .Tab{
-        flex: 30;
-        display: inherit;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        span{
-            font-weight: 600;
-            text-transform:capitalize;
-            font-size: 13pt;
-        }
-        transition: all $transitionTime;
-        &.active{
-            border-bottom: 2px solid var(--main-color);
-            color:var(--main-color);
-        }
-        &:hover{
-            color:var(--main-color)
+    .tabs{
+        width: 100%;
+        height: $topMenuHeight;
+        display: flex;
+        .Tab{
+            flex: 30;
+            display: inherit;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            span{
+                font-weight: 600;
+                text-transform:capitalize;
+                // text-transform:uppercase;
+                font-size: 11pt;
+            }
+            transition: all $transitionTime;
+            &.active{
+                border-bottom: 2px solid var(--main-color);
+                color:var(--main-color);
+            }
+            &:hover{
+                color:var(--main-color)
+            }
         }
     }
-    
+    .menuitems{
+        display: flex;
+        flex-wrap: wrap;
+        padding-top: 20px;
+    }
+    .Menuitem{
+        height: 40px;
+        display: flex;
+        width: min-content;
+        align-items: center;
+        justify-content: flex-start;
+        margin-left: 20px;
+        input,select{
+            padding:4px 5px;
+            padding: 4px 5px;
+            background: var(--menu-backcolor);
+            color: var( --text-color);
+            border-radius: 2px;
+            border: 1px solid var(--secondary-color);
+        } 
+    }        
+}
+// for slow theme changing
+.Topmenu,.Sidemenu,.Stack{
+    $stt: $transitionTime;//slow trans time
+    $stf: ease-in;//slow trans function
+    transition: background-color $stt $stf;
+    *{
+        transition: background-color $stt $stf, color $stt $stf,fill $stt $stf,stroke $stt $stf;    
+    }
 }
 .Topmenu{
     height: $topMenuHeight;
@@ -114,7 +155,7 @@ html,body{
         }
         .topbutton-language{
             font-weight: 600;
-            text-transform:uppercase;
+            text-transform:capitalize;
         } 
     }
 }
@@ -129,7 +170,7 @@ html,body{
     display: flex;
     flex-wrap: wrap;
     justify-content: flex-start;
-    align-content: start;
+    align-content: flex-start;
     .PageWrapper{
         transition: all $transitionTime;
         height: var(--page-wrapper-height);
@@ -156,7 +197,7 @@ html,body{
         display: flex;
         align-items: center;
         justify-content: center;
-        // font-family: 'Times New Roman',;
+        // font-family: 'Times New Roman';
         font-size: calc(200px * var(--zoom));
     }
 }

@@ -4,8 +4,10 @@ const getinitialState = () => {
             name:'OptyDoc',
             version:'0.0.1',
             colorMode:'light',
+            colorModeOptions:[['Light','light'],['Dark','dark']],
             languageCode:'en',
             tabSelected:'edit',
+            tabSelectedOptions:[['Edit','edit'],['Copy','copy'],['Print','print']],
             languageWords:{}
             
         }  
@@ -19,7 +21,12 @@ const appReducer = (state = getinitialState(), action)=>{
         case 'colorMode/colormodeSet':
             return {...state,colorMode:action.payload}
         case 'colorMode/colormodeToggle':
-            return {...state,colorMode:action.payload}
+            let newColorMode = 'light';
+            switch(state.colorMode){
+                case 'light':newColorMode = 'dark';break;
+                case 'dark':newColorMode = 'light';break;
+            }
+            return {...state,colorMode:newColorMode}
         case 'menu/tabSet': 
             if(['edit','copy','print'].indexOf(action.payload) > -1)
             return {...state,tabSelected:action.payload}
