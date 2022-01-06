@@ -8,7 +8,8 @@ const getinitialState = () => {
             languageCode:'en',
             tabSelected:'edit',
             tabSelectedOptions:[['Edit','edit'],['Copy','copy'],['Print','print']],
-            languageWords:{}
+            languageWords:{},
+            blockSelected:''
             
         }  
       }else{
@@ -30,6 +31,8 @@ const appReducer = (state = getinitialState(), action)=>{
         case 'menu/tabSet': 
             if(['edit','copy','print'].indexOf(action.payload) > -1)
             return {...state,tabSelected:action.payload}
+        case 'stack/selectedBlockSet':
+            return {...state,blockSelected:action.payload}
         default:
             return state
     }

@@ -21,9 +21,20 @@ function Menuitem(props) {
     }
     const getContent = ()=>{
         let ret = [];
+
+        let inputValue = ()=>{
+            let ret = ''
+            if(store[target[0]]){
+                ret =  store[target[0]][target[1]];
+            }
+            return ret;
+        }
         switch(props.type){
             case 'text':
-                ret.push(<input key={target[1]} value={store[target[0]][target[1]]} onChange={handleMIchange}/>);
+                ret.push(<input key={target[1]} value={inputValue()} onChange={handleMIchange} placeholder={props.placeholder}/>);
+                break;
+            case 'number':
+                ret.push(<input key={target[1]} type="number" value={inputValue()} onChange={handleMIchange} placeholder={props.placeholder}/>);
                 break;
             case 'selector':
                 let options = props.options.map(([title,optionValue],index)=>{

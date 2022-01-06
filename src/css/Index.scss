@@ -30,7 +30,7 @@ border: 1px solid transparent;
 }
 .Page{
     --main-color:rgb(3,97,236);
-    --secondary-color:rgb(121, 121, 121);
+    --secondary-color:rgb(163 163 163);
     --menu-backcolor:rgb(254,254,254);
     --stack-background:rgb(238,238,238);
     --text-color:rgb(26, 26, 26);
@@ -99,7 +99,10 @@ border: 1px solid transparent;
             color: var( --text-color);
             border-radius: 2px;
             border: 1px solid var(--secondary-color);
-        } 
+        }
+        input[type=number]{
+            width: 5em;
+        }
     }        
 }
 // for slow theme changing
@@ -169,7 +172,10 @@ border: 1px solid transparent;
     overflow: auto;
     display: flex;
     flex-wrap: wrap;
+    //TODO somehow center it but on big scale align left
+    //TODO align last line to the left
     justify-content: flex-start;
+
     align-content: flex-start;
     .PageWrapper{
         transition: all $transitionTime;
@@ -178,7 +184,7 @@ border: 1px solid transparent;
         min-width: var(--page-wrapper-width);
         margin-top: calc(1cm * var(--zoom));
         margin-left: calc(1cm * var(--zoom) );
-        --page-margin-left:calc(1cm * var(--zoom));
+        // --page-margin-left:calc(0.1cm * var(--zoom));
         --page-margin-right:var(--page-margin-left);
         --page-margin-top:var(--page-margin-left);
         --page-margin-bottom:var(--page-margin-left);
@@ -195,9 +201,19 @@ border: 1px solid transparent;
         background-color: var(--paper-backcolor);
         word-break: break-all;
         display: flex;
-        align-items: center;
-        justify-content: center;
+        // align-items: center;
+        // justify-content: center;
         // font-family: 'Times New Roman';
-        font-size: calc(200px * var(--zoom));
+        font-size: calc(20px * var(--zoom));
+        .Block{
+            -webkit-box-sizing:border-box;
+            -moz-box-sizing:border-box;
+            -ms-box-sizing:border-box;
+            box-sizing:border-box;
+            outline: var(--block-border);
+            display: flex;
+            width:calc( var(--block-width) * var(--zoom) );
+            height:calc( var(--block-height) * var(--zoom) );
+        }
     }
 }

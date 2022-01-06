@@ -10,7 +10,27 @@ const getinitialState = () => {
             pageSizeOptions:[['A4','A4'],['A3','A3']],
             pageOrientation:'portrait',
             pageOrientationOptions:[['Portrait','portrait'],['Landscape','landscape']],
-            zoom:100
+            marginLeft:'0',
+            marginRight:'0',
+            marginTop:'0',
+            marginBottom:'0',
+            zoom:100,
+            children:[{
+                uuid:'123',
+                localID:'1',
+                parentID:'',
+                humanfriendlyID:'block_1',
+                valueType:'custom',
+                innerText:'inner text here, hello',
+                isEditing:false,
+                isTextediting:false,
+                style:{
+                    displayMode:'flex',
+                    width:'100mm',
+                    height:'100mm'
+
+                }
+            }]
         }  
       }else{
         console.debug('Getting app data from localstorage')
@@ -20,6 +40,7 @@ const getinitialState = () => {
 const templateReducer = (state = getinitialState(), action)=>{
     switch(action.type){
         case 'template/zoomSet':
+            //TODO make if functional for scroll
             if(action.payload>=500){
                 action.payload=500
             }
@@ -36,8 +57,13 @@ const templateReducer = (state = getinitialState(), action)=>{
         case 'template/pageOrientationSet':
             //TODO validate payload
             return {...state,pageOrientation:action.payload}
+        case 'template/marginLeftSet':
+            //TODO validate payload
+            if(action.payload>=0&&action.payload<1000){
+                return {...state,marginLeft:action.payload}
+            }
         default:
-            return state
+            return state;
     }
 }
 

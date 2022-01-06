@@ -10,9 +10,17 @@ function Sidemenu(props) {
       case 'edit':
         //TODO get if any block selected
         //TODO get if template selected
-        ret.push(<Menuitem key='1' store={props.store} value="template.name" type="text" placeholder="Template name" />)
-        ret.push(<Menuitem key='2' store={props.store} value="template.pageSize" type="selector" options={stateNow.template.pageSizeOptions} />);
-        ret.push(<Menuitem key='3' store={props.store} value="template.pageOrientation" type="selector" options={stateNow.template.pageOrientationOptions} />)
+        if(stateNow.app.blockSelected == ''){
+          ret.push(<Menuitem key='1' store={props.store} value="template.name" type="text" placeholder="Template name" />)
+          ret.push(<Menuitem key='2' store={props.store} value="template.pageSize" type="selector" options={stateNow.template.pageSizeOptions} />)
+          ret.push(<Menuitem key='3' store={props.store} value="template.pageOrientation" type="selector" options={stateNow.template.pageOrientationOptions} />)
+          ret.push(<Menuitem key='4' store={props.store} value="template.marginLeft" type="number" placeholder="Page margins" />)
+          
+        }else{
+          ret.push(<Menuitem key='1' store={props.store} value="template.blockSelectedWidth" type="number" placeholder="width" />)
+          ret.push(<Menuitem key='2' store={props.store} value="template.blockSelectedHeight" type="number" placeholder="height" />)
+          ret.push(<Menuitem key='3' store={props.store} value="template.blockSelectedText" type="text"placeholder="Block text" />)
+        }
         break;
       case 'copy':
         ret = 'Copy';
@@ -29,7 +37,7 @@ function Sidemenu(props) {
     <div className='Sidemenu'>
         <div className='tabs'>
           {stateNow.app.tabSelectedOptions.map(([tabTitle,tabValue],i)=>{
-            return <Tab store={props.store} tabName={tabTitle} tabValue={tabValue}/>
+            return <Tab key={tabValue} store={props.store} tabName={tabTitle} tabValue={tabValue}/>
           })}
         </div>
         <div className='menuitems'>
