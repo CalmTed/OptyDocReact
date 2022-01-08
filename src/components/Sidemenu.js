@@ -14,12 +14,12 @@ function Sidemenu(props) {
           ret.push(<Menuitem key='1' store={props.store} value="template.name" type="text" placeholder="Template name" />)
           ret.push(<Menuitem key='2' store={props.store} value="template.pageSize" type="selector" options={stateNow.template.pageSizeOptions} />)
           ret.push(<Menuitem key='3' store={props.store} value="template.pageOrientation" type="selector" options={stateNow.template.pageOrientationOptions} />)
-          ret.push(<Menuitem key='4' store={props.store} value="template.marginLeft" type="number" placeholder="Page margins" />)
+          ret.push(<Menuitem key='4' store={props.store} value="template.marginLeft" type="size" placeholder="Page margins" />)
           
         }else{
-          ret.push(<Menuitem key='1' store={props.store} value="template.blockSelectedWidth" type="number" placeholder="width" />)
-          ret.push(<Menuitem key='2' store={props.store} value="template.blockSelectedHeight" type="number" placeholder="height" />)
-          ret.push(<Menuitem key='3' store={props.store} value="template.blockSelectedText" type="text"placeholder="Block text" />)
+          ret.push(<Menuitem key='1' store={props.store} value="selectedBlock.width" type="size" placeholder="width" />)
+          ret.push(<Menuitem key='2' store={props.store} value="selectedBlock.height" type="size" placeholder="height" />)
+          ret.push(<Menuitem key='3' store={props.store} value="selectedBlock.innerText" type="text"placeholder="Block text" />)
         }
         break;
       case 'copy':

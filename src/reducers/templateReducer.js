@@ -1,4 +1,6 @@
+import store from "../store";
 const getinitialState = () => {
+    //SHORTCUT HERE for it to not to store localy
     if(window.localStorage.getItem('ODStore') == undefined){
         return  {
             uuid:'000000',
@@ -10,14 +12,14 @@ const getinitialState = () => {
             pageSizeOptions:[['A4','A4'],['A3','A3']],
             pageOrientation:'portrait',
             pageOrientationOptions:[['Portrait','portrait'],['Landscape','landscape']],
-            marginLeft:'0',
+            marginLeft:'10',
             marginRight:'0',
             marginTop:'0',
             marginBottom:'0',
             zoom:100,
             children:[{
                 uuid:'123',
-                localID:'1',
+                localID:'0',
                 parentID:'',
                 humanfriendlyID:'block_1',
                 valueType:'custom',
@@ -26,7 +28,7 @@ const getinitialState = () => {
                 isTextediting:false,
                 style:{
                     displayMode:'flex',
-                    width:'100mm',
+                    width:'100mm', 
                     height:'100mm'
 
                 }
@@ -38,7 +40,68 @@ const getinitialState = () => {
       } 
 }
 const templateReducer = (state = getinitialState(), action)=>{
+    let getNewChildrenList = (property)=>{
+  
+        let children = new Array(state.children)[0];
+        if(['newBlockAdd','blockRemove'].indexOf(property) == -1){
+            children.map((ch)=>{
+                if(ch.uuid == action.blockSelected){   
+                    if(['innerText'].indexOf(property)>-1){
+                        ch[property] = action.payload
+                    }else{
+                        ch.style[property] = action.payload
+                    }      
+                }
+            })
+        }else{
+            //custom comands
+            switch(property){
+                case 'newBlockAdd':
+                    let _uuid = Math.round(Math.random()*10000000);
+                    let _localId = children.length;
+                    let _HFId = 'block_'+(_localId+1);
+                    //default new block here
+                    children.push({
+                        uuid:_uuid,
+                        localID:_localId,
+                        parentID:'',
+                        humanfriendlyID:_HFId,
+                        valueType:'custom',
+                        innerText:'New block',
+                        isEditing:false,
+                        isTextediting:false,
+                        style:{
+                            displayMode:'flex',
+                            width:'100mm', 
+                            height:'100mm'
+                        }
+                    });break;
+                case 'blockRemove':
+                    //remove from array
+                    //resort
+                    let _childrenLess = [];
+                    children.forEach((ch)=>{
+                        if(ch.uuid == action.blockSelected){  
+                            return; 
+                        }else{
+                            ch.localID = _childrenLess.length;
+                            ch.humanfriendlyID = 'block_'+(_childrenLess.length+1);
+                            
+                            _childrenLess.push(ch)
+                        }
+                    })
+                    children = _childrenLess;
+            }
+        }
+        return children;
+    };
     switch(action.type){
+        case 'template/newBlockAdd':
+            
+            return {...state,children:getNewChildrenList('newBlockAdd')}
+        case 'template/blockRemove':
+            return {...state,children:getNewChildrenList('blockRemove')}
+            // return state;
         case 'template/zoomSet':
             //TODO make if functional for scroll
             if(action.payload>=500){
@@ -62,6 +125,15 @@ const templateReducer = (state = getinitialState(), action)=>{
             if(action.payload>=0&&action.payload<1000){
                 return {...state,marginLeft:action.payload}
             }
+        case 'selectedBlock/innerTextSet':
+            //TODO validate payload
+            return {...state,children:getNewChildrenList('innerText')}
+        case 'selectedBlock/widthSet':
+            //TODO validate payload
+            return {...state,children:getNewChildrenList('width')}
+        case 'selectedBlock/heightSet':
+            //TODO validate payload
+            return {...state,children:getNewChildrenList('height')}
         default:
             return state;
     }

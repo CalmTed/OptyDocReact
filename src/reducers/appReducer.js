@@ -6,13 +6,12 @@ const getinitialState = () => {
             colorMode:'light',
             colorModeOptions:[['Light','light'],['Dark','dark']],
             languageCode:'en',
+            languageWords:{},
             tabSelected:'edit',
             tabSelectedOptions:[['Edit','edit'],['Copy','copy'],['Print','print']],
-            languageWords:{},
-            blockSelected:''
-            
+            blockSelected:'' 
         }  
-      }else{
+      }else {
         console.debug('Getting app data from localstorage')
         return JSON.parse(window.localStorage.getItem('ODStore')).app;
       } 
@@ -30,9 +29,9 @@ const appReducer = (state = getinitialState(), action)=>{
             return {...state,colorMode:newColorMode}
         case 'menu/tabSet': 
             if(['edit','copy','print'].indexOf(action.payload) > -1)
-            return {...state,tabSelected:action.payload}
+            return {...state,tabSelected:action.payload};break;
         case 'stack/selectedBlockSet':
-            return {...state,blockSelected:action.payload}
+            return {...state,blockSelected:action.payload}; break;
         default:
             return state
     }

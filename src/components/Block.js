@@ -16,6 +16,7 @@ function Block(props) {
         return ret;
     }
     const getStyle = ()=>{
+        //what if the block is too small to select
         let blockOutline = ''
         if(props.blockData.uuid == stateNow.app.blockSelected){
             blockOutline = '2px dashed var(--main-color)'
@@ -34,7 +35,7 @@ function Block(props) {
         props.store.dispatch({type:'stack/selectedBlockSet',payload:props.blockData.uuid})
     }
     return (
-    <div className="Block" style={getStyle()} onClick={handleClick}>
+    <div key={props.blockData.uuid} className="Block" style={getStyle()} onClick={handleClick}>
         {getContent()}
         {/* {getBlocks()} */}
     </div>

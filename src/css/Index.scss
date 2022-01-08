@@ -100,7 +100,7 @@ border: 1px solid transparent;
             border-radius: 2px;
             border: 1px solid var(--secondary-color);
         }
-        input[type=number]{
+        input.size{
             width: 5em;
         }
     }        
@@ -205,15 +205,16 @@ border: 1px solid transparent;
         // justify-content: center;
         // font-family: 'Times New Roman';
         font-size: calc(20px * var(--zoom));
-        .Block{
-            -webkit-box-sizing:border-box;
-            -moz-box-sizing:border-box;
-            -ms-box-sizing:border-box;
-            box-sizing:border-box;
+        .Block{        
+            transition: all $transitionTime;
+            --block-border:2px dashed transparent;
             outline: var(--block-border);
             display: flex;
             width:calc( var(--block-width) * var(--zoom) );
             height:calc( var(--block-height) * var(--zoom) );
+            &:hover{
+                --block-border:2px dashed var(--secondary-color);
+            }
         }
     }
 }
