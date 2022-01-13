@@ -13,7 +13,7 @@ function Stack(props) {
             //for now show nothing
         }else{//if there`re some children
             //show them
-            stateNow.template.children.forEach(childBlock => {
+            stateNow.template.children.filter(ch=>{return ch.parentID == ''}).forEach(childBlock => {
                 ret.push(<Block key={childBlock.uuid} blockStyle={childBlock.style} blockText={childBlock.innerText} blockData={childBlock} store={props.store}/>)
             });
         }

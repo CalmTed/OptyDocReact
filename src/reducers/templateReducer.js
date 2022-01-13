@@ -17,22 +17,7 @@ const getinitialState = () => {
             marginTop:'0',
             marginBottom:'0',
             zoom:100,
-            children:[{
-                uuid:'123',
-                localID:'0',
-                parentID:'',
-                humanfriendlyID:'block_1',
-                valueType:'custom',
-                innerText:'inner text here, hello',
-                isEditing:false,
-                isTextediting:false,
-                style:{
-                    displayMode:'flex',
-                    width:'100mm', 
-                    height:'100mm'
-
-                }
-            }]
+            children:[]
         }  
       }else{
         console.debug('Getting app data from localstorage')
@@ -40,10 +25,10 @@ const getinitialState = () => {
       } 
 }
 const templateReducer = (state = getinitialState(), action)=>{
-    let getNewChildrenList = (property)=>{
-  
+    const getNewChildrenList = (property)=>{
         let children = new Array(state.children)[0];
         if(['newBlockAdd','blockRemove'].indexOf(property) == -1){
+            //just changing children property
             children.map((ch)=>{
                 if(ch.uuid == action.blockSelected){   
                     if(['innerText'].indexOf(property)>-1){
@@ -57,40 +42,91 @@ const templateReducer = (state = getinitialState(), action)=>{
             //custom comands
             switch(property){
                 case 'newBlockAdd':
-                    let _uuid = Math.round(Math.random()*10000000);
-                    let _localId = children.length;
-                    let _HFId = 'block_'+(_localId+1);
+                    const _uuid = Math.round(Math.random()*10000000);//TO DO move to emmiter method
+                    const _localId = children.length;
+                    const _HFId = 'b'+(_localId+1);
+                    const _parentID = action.blockSelected;
                     //default new block here
                     children.push({
                         uuid:_uuid,
                         localID:_localId,
-                        parentID:'',
+                        parentID:_parentID,//selected block
                         humanfriendlyID:_HFId,
                         valueType:'custom',
-                        innerText:'New block',
+                        innerText:'b'+_localId,
                         isEditing:false,
                         isTextediting:false,
                         style:{
                             displayMode:'flex',
-                            width:'100mm', 
-                            height:'100mm'
+                            width:'auto', 
+                            height:'auto',
+                            display:'block',
+                            alignVertical:'start',
+                            alignVerticalOptions:[
+                                ['Top','start'],
+                                ['Center','center'],
+                                ['Bottom','end'],
+                                ['Space around','space-around'],
+                                ['Space between','space-between'],
+                                ['Space evenly','space-evenly']
+                            ],
+                            alignHorizontal:'start',
+                            alignHorizontalOptions:[
+                                ['Left','start'],
+                                ['Center','center'],
+                                ['Right','end'],
+                                ['Space around','space-around'],
+                                ['Space between','space-between'],
+                                ['Space evenly','space-evenly']
+                            ],
+                            displayType:'block',
+                            displayTypeOptions:[['Inline','inline'],['Block','block'],['Flex','flex']],
+                           
+                            marginTop:'0',
+                            marginBottom:'0',
+                            marginLeft:'0',
+                            marginRight:'0',
+
+                            fontFamily:'Arial',
+                            fontFamilyOptions:[
+                                ['Arial','Arial'],
+                                ['Times New Roman','Times New Roman'],
+                                ['Calibri','Calibri'],
+                                ['Roboto','Roboto']
+                            ],
+                            fontSize:'14pt',
+                            fontColor:'#000',
+                            fontBold:'',
+                            fontItalic:''
                         }
                     });break;
                 case 'blockRemove':
-                    //remove from array
-                    //resort
-                    let _childrenLess = [];
-                    children.forEach((ch)=>{
-                        if(ch.uuid == action.blockSelected){  
-                            return; 
-                        }else{
-                            ch.localID = _childrenLess.length;
-                            ch.humanfriendlyID = 'block_'+(_childrenLess.length+1);
-                            
-                            _childrenLess.push(ch)
-                        }
-                    })
-                    children = _childrenLess;
+                    const getParentList = (_children,_parID,_parList)=>{
+                        _parList.push(_parID)
+                        _children.forEach((ch)=>{
+                            if(ch.parentID == _parID){
+                                _parList = [...getParentList(_children,ch.uuid,_parList)];
+                            }
+                        });
+                        return _parList;
+                    }
+                    const getNewChildrenList = (_children,_parList)=>{
+                        let _childrenLess = [];
+                        _children.forEach((ch)=>{
+                            if(_parList.indexOf(ch.uuid) > -1){
+                                return;
+                            }else{
+                                //resorting indexes
+                                ch.localID = _childrenLess.length;
+                                ch.humanfriendlyID = 'b'+(_childrenLess.length+1);
+                                
+                                _childrenLess.push(ch)
+                            }
+                        })
+                        return _childrenLess;
+                    }
+                    const _parList = getParentList(children,action.blockSelected,[]);
+                    children = getNewChildrenList(children,_parList);
             }
         }
         return children;
@@ -134,7 +170,45 @@ const templateReducer = (state = getinitialState(), action)=>{
         case 'selectedBlock/heightSet':
             //TODO validate payload
             return {...state,children:getNewChildrenList('height')}
+        case 'selectedBlock/alignVerticalSet':
+            //TODO validate payload
+            return {...state,children:getNewChildrenList('alignVertical')}
+        case 'selectedBlock/alignHorizontalSet':
+            //TODO validate payload
+            return {...state,children:getNewChildrenList('alignHorizontal')}
+        case 'selectedBlock/displayTypeSet':
+            //TODO validate payload
+            return {...state,children:getNewChildrenList('displayType')};
+        case 'selectedBlock/marginTopSet':
+            //TODO validate payload
+            return {...state,children:getNewChildrenList('marginTop')}
+        case 'selectedBlock/marginBottomSet':
+            //TODO validate payload
+            return {...state,children:getNewChildrenList('marginBottom')}
+        case 'selectedBlock/marginLeftSet':
+            //TODO validate payload
+            return {...state,children:getNewChildrenList('marginLeft')}
+        case 'selectedBlock/marginRightSet':
+            //TODO validate payload
+            return {...state,children:getNewChildrenList('marginRight')}
+        
+        case 'selectedBlock/fontFamilySet':
+            //TODO validate payload
+            return {...state,children:getNewChildrenList('fontFamily')}
+        case 'selectedBlock/fontSizeSet':
+            //TODO validate payload
+            return {...state,children:getNewChildrenList('fontSize')}
+        case 'selectedBlock/fontColorSet':
+            //TODO validate payload
+            return {...state,children:getNewChildrenList('fontColor')}
+        case 'selectedBlock/fontBoldSet':
+            //TODO validate payload
+            return {...state,children:getNewChildrenList('fontBold')}
+        case 'selectedBlock/fontItalicSet':
+            //TODO validate payload
+            return {...state,children:getNewChildrenList('fontItalic')}
         default:
+            console.warn('Unhandaled case in template reducer: ',action.type)
             return state;
     }
 }

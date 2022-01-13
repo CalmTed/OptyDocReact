@@ -22,17 +22,17 @@ function Topbutton(props) {
     }
     const handleClick = ()=>{
         //TODO check if not disabled
+        const _blockSelected = props.store.getState().app.blockSelected;
         switch(props.name){
             case 'settings':
                 props.store.dispatch({type:'colorMode/colormodeToggle',payload:''});
                 break;
             case 'newBlock':
-                props.store.dispatch({type:'template/newBlockAdd',payload:''});
+                props.store.dispatch({type:'template/newBlockAdd',payload:'',blockSelected:_blockSelected});
                 break;
             case 'removeBlock':
-                let _uuidToDelete = props.store.getState().app.blockSelected;
                 props.store.dispatch({type:'stack/selectedBlockSet',payload:''})
-                props.store.dispatch({type:'template/blockRemove',payload:'',blockSelected:_uuidToDelete});
+                props.store.dispatch({type:'template/blockRemove',payload:'',blockSelected:_blockSelected});
                 break;
         }
     }

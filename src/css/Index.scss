@@ -84,26 +84,63 @@ border: 1px solid transparent;
         display: flex;
         flex-wrap: wrap;
         padding-top: 20px;
+        overflow-y: auto;
+        height: calc(100% - 66px);
+        align-content: start;
+        .blockNavigator{
+            height: min-content;
+            display: flex;
+            width: calc(100% - 20px);
+            align-items: center;
+            justify-content: flex-start;
+            margin-left: 20px;
+            color: var(--secondary-color);
+            flex-wrap: wrap;
+            .blockName{
+                width: 100%;
+            }
+            .blockParent{
+                width: 100%;
+            }
+            .blockNeigbor{
+                width: 100%;
+            }
+            .blockChildren{
+                width: 100%;
+            }
+            .blockLink{
+                text-decoration: underline;
+                cursor: pointer;
+                margin: 0 3px;
+            }
+        }
+        .Menuitem{
+            height: 40px;
+            display: flex;
+            width: min-content;
+            align-items: center;
+            justify-content: flex-start;
+            margin-left: 20px;
+            input,select{
+                padding:4px 5px;
+                padding: 4px 5px;
+                background: var(--menu-backcolor);
+                color: var( --text-color);
+                border-radius: 2px;
+                border: 1px solid var(--secondary-color);
+            }
+            input.size{
+                width: 5em;
+            }
+            
+        }  
+        .spacer{
+            width: calc(100% - 40px);
+            height: 1em;
+            display: block;
+            margin: 1em 20px 0 20px;
+        }      
     }
-    .Menuitem{
-        height: 40px;
-        display: flex;
-        width: min-content;
-        align-items: center;
-        justify-content: flex-start;
-        margin-left: 20px;
-        input,select{
-            padding:4px 5px;
-            padding: 4px 5px;
-            background: var(--menu-backcolor);
-            color: var( --text-color);
-            border-radius: 2px;
-            border: 1px solid var(--secondary-color);
-        }
-        input.size{
-            width: 5em;
-        }
-    }        
 }
 // for slow theme changing
 .Topmenu,.Sidemenu,.Stack{
@@ -200,20 +237,40 @@ border: 1px solid transparent;
         padding-bottom: var(--page-margin-bottom);
         background-color: var(--paper-backcolor);
         word-break: break-all;
-        display: flex;
         // align-items: center;
         // justify-content: center;
         // font-family: 'Times New Roman';
         font-size: calc(20px * var(--zoom));
+        // display: flex;
+        // flex-wrap: wrap;
+        display: block;
         .Block{        
             transition: all $transitionTime;
-            --block-border:2px dashed transparent;
+            --block-border:1px dashed transparent;
+            --selected-border:1px dashed var(--main-color);
+            // padding:10px;
+            // VARIABLES
             outline: var(--block-border);
-            display: flex;
-            width:calc( var(--block-width) * var(--zoom) );
-            height:calc( var(--block-height) * var(--zoom) );
+            width:var(--block-width);
+            height:var(--block-height);
+            align-content: var(--block-align);
+            justify-content: var(--block-justify);
+            display: var(--block-display);
+            flex-wrap: wrap;
+
+            margin-top: var(--block-marginTop);
+            margin-bottom: var(--block-marginBottom);
+            margin-left: var(--block-marginLeft);
+            margin-right: var(--block-marginRight);
+
+            font-family: var(--block-fontFamily);
+            font-size: var(--block-fontSize);
+            color: var(--block-fontColor);
+
+            font-weight: var(--block-fontBold);
+            font-style: var(--block-fontItalic);
             &:hover{
-                --block-border:2px dashed var(--secondary-color);
+                --block-border:1px dashed var(--secondary-color);
             }
         }
     }
