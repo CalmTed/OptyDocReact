@@ -81,19 +81,20 @@ border: 1px solid transparent;
         }
     }
     .menuitems{
+        $sideMenuItemsMargin:10px;
         display: flex;
         flex-wrap: wrap;
-        padding-top: 20px;
+        padding: 20px;
         overflow-y: auto;
-        height: calc(100% - 66px);
-        align-content: start;
+        height: calc(100% - 86px);
+        align-content: flex-start;
         .blockNavigator{
             height: min-content;
             display: flex;
-            width: calc(100% - 20px);
+            width: calc(100% - #{$sideMenuItemsMargin});
             align-items: center;
             justify-content: flex-start;
-            margin-left: 20px;
+            margin-left: #{$sideMenuItemsMargin};
             color: var(--secondary-color);
             flex-wrap: wrap;
             .blockName{
@@ -120,25 +121,51 @@ border: 1px solid transparent;
             width: min-content;
             align-items: center;
             justify-content: flex-start;
-            margin-left: 20px;
-            input,select{
+            margin-left: #{$sideMenuItemsMargin};
+            &.textarea{
+                width: calc(100% - #{$sideMenuItemsMargin} - #{$sideMenuItemsMargin});
+                height: min-content;
+                margin-top: 7px;
+            }
+            .textarea{
+                resize: none;
+                height: 6em;
+                width: 100%;
+            }
+            input,select,textarea{
                 padding:4px 5px;
                 padding: 4px 5px;
                 background: var(--menu-backcolor);
                 color: var( --text-color);
                 border-radius: 2px;
                 border: 1px solid var(--secondary-color);
+                font-family: inherit;
             }
             input.size{
                 width: 5em;
             }
+            .color{
+                -webkit-appearance: none;
+                border: none;
+                // border-radius: 2px;
+                border: 1px solid var(--secondary-color);
+                // width: 32px;
+                // height: 32px;
+                &::-webkit-color-swatch-wrapper {
+                    padding: 0;
+                }
+                &::-webkit-color-swatch {
+                    border: none;
+                }
+            }
             
         }  
         .spacer{
-            width: calc(100% - 40px);
+            width: calc(100% - #{$sideMenuItemsMargin} - #{$sideMenuItemsMargin});
             height: 1em;
             display: block;
-            margin: 1em 20px 0 20px;
+            margin: 1em #{$sideMenuItemsMargin} 0 #{$sideMenuItemsMargin};
+            color: var(--secondary-color);
         }      
     }
 }
@@ -209,8 +236,8 @@ border: 1px solid transparent;
     overflow: auto;
     display: flex;
     flex-wrap: wrap;
-    //TODO somehow center it but on big scale align left
-    //TODO align last line to the left
+    //TODO somehow center pages list but on big scale align left
+    //TODO align last line of pages to the left
     justify-content: flex-start;
 
     align-content: flex-start;
@@ -221,10 +248,6 @@ border: 1px solid transparent;
         min-width: var(--page-wrapper-width);
         margin-top: calc(1cm * var(--zoom));
         margin-left: calc(1cm * var(--zoom) );
-        // --page-margin-left:calc(0.1cm * var(--zoom));
-        --page-margin-right:var(--page-margin-left);
-        --page-margin-top:var(--page-margin-left);
-        --page-margin-bottom:var(--page-margin-left);
         overflow: hidden;
         box-shadow: $boxShadow;
     }
@@ -236,13 +259,8 @@ border: 1px solid transparent;
         padding-top: var(--page-margin-top);
         padding-bottom: var(--page-margin-bottom);
         background-color: var(--paper-backcolor);
-        word-break: break-all;
-        // align-items: center;
-        // justify-content: center;
-        // font-family: 'Times New Roman';
+        // word-break: break-all;
         font-size: calc(20px * var(--zoom));
-        // display: flex;
-        // flex-wrap: wrap;
         display: block;
         .Block{        
             transition: all $transitionTime;
@@ -251,26 +269,48 @@ border: 1px solid transparent;
             // padding:10px;
             // VARIABLES
             outline: var(--block-border);
-            width:var(--block-width);
-            height:var(--block-height);
+            width:calc(var(--block-width) - var(--block-marginLeft) - var(--block-marginRight));
+            height:calc(var(--block-height) - var(--block-marginTop) - var(--block-marginBottom));
+            padding-top: var(--block-marginTop);
+            padding-bottom: var(--block-marginBottom);
+            padding-left: var(--block-marginLeft);
+            padding-right: var(--block-marginRight);
+            
+            align-content: inherit;
+            justify-content: inherit;
+            text-align: inherit;
+            display: inherit;
             align-content: var(--block-align);
             justify-content: var(--block-justify);
+            text-align: var(--block-justify);
             display: var(--block-display);
             flex-wrap: wrap;
+            word-break: break-word;
 
-            margin-top: var(--block-marginTop);
-            margin-bottom: var(--block-marginBottom);
-            margin-left: var(--block-marginLeft);
-            margin-right: var(--block-marginRight);
 
+            font-family: inherit;
+            font-size: inherit;
+            color: inherit;
+            background-color: inherit;
+            font-weight: inherit;
+            font-style: inherit;
+            text-decoration: inherit;
             font-family: var(--block-fontFamily);
             font-size: var(--block-fontSize);
             color: var(--block-fontColor);
-
+            background-color: var(--block-backgroundColor);
             font-weight: var(--block-fontBold);
             font-style: var(--block-fontItalic);
+            text-decoration: var(--block-fontUnderline);
             &:hover{
                 --block-border:1px dashed var(--secondary-color);
+            }
+            p{
+                margin: 0;
+                display: inherit;
+                width: 100%;
+                align-content: inherit;
+                justify-content: inherit;
             }
         }
     }

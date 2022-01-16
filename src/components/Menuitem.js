@@ -10,6 +10,9 @@ function Menuitem(props) {
             case 'text':
                 ret +='text'
                 break;
+            case 'textarea':
+                ret +='textarea'
+                break;
             case 'selector':
                 ret +='selector'
                 break;
@@ -42,12 +45,20 @@ function Menuitem(props) {
         switch(props.type){
             case 'text':
                 ret.push(<input key={target[1]} value={inputValue()} onChange={handleMIchange} placeholder={props.placeholder} title={target[1]}/>);
+                // ret.push(<textarea key={target[1]} className='text' onChange={handleMIchange} placeholder={props.placeholder} title={target[1]}>{inputValue()}</textarea>);
+                break;
+            case 'textarea':
+                // ret.push(<input key={target[1]} value={inputValue()} onChange={handleMIchange} placeholder={props.placeholder} title={target[1]}/>);
+                ret.push(<textarea key={target[1]} className='textarea' value={inputValue()} onChange={handleMIchange} placeholder={props.placeholder} title={target[1]}></textarea>);
                 break;
             case 'size':
                 ret.push(<input key={target[1]} className='size' value={inputValue()} onChange={handleMIchange} placeholder={props.placeholder}  title={target[1]}/>);
                 break;
+            case 'color':
+                ret.push(<input key={target[1]} className='color' type='color' value={inputValue()} onChange={handleMIchange} placeholder={props.placeholder}  title={target[1]}/>);
+                break;
             case 'selector':
-                let _options;
+                let _options = [['','']];
                 if(typeof props.options == 'string'){
                     let selectedBlockID = store.app.blockSelected;
                     let selectedBlockObject = store.template.children.filter((b)=>{return b.uuid == selectedBlockID})[0]
@@ -56,9 +67,7 @@ function Menuitem(props) {
                     }else if(selectedBlockObject.style[props.options]){
                         _options = selectedBlockObject.style[props.options];
                     }
-                    // _options = [[1,2]];
-
-                }else{
+                }else if(typeof props.options == 'object'){
                     _options = props.options;
                 }
                 let options = _options.map(([title,optionValue],index)=>{

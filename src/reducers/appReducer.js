@@ -31,12 +31,12 @@ const appReducer = (state = getinitialState(), action)=>{
             if(['edit','copy','print'].indexOf(action.payload) > -1)
             return {...state,tabSelected:action.payload};break;
         case 'stack/selectedBlockSet':
+             
             if(typeof action.payload != 'undefined'){
                 return {...state,blockSelected:action.payload}; 
             }else{
                 return state;
             }
-            break;
         default:
             return state
     }

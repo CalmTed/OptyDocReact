@@ -3,9 +3,6 @@ import Block from './Block';
 function Stack(props) {
     const stateNow = props.store.getState();
     const zoom = stateNow.template.zoom;
-    const setSize = (zoom)=>{
-        
-    }
     const getBlocks = ()=>{
         let ret = [];
         if(stateNow.template.children.length == 0){//no children
@@ -14,9 +11,10 @@ function Stack(props) {
         }else{//if there`re some children
             //show them
             stateNow.template.children.filter(ch=>{return ch.parentID == ''}).forEach(childBlock => {
-                ret.push(<Block key={childBlock.uuid} blockStyle={childBlock.style} blockText={childBlock.innerText} blockData={childBlock} store={props.store}/>)
+                ret.push(<Block key={childBlock.uuid} blockData={childBlock} store={props.store}/>)
             });
         }
+        
         return ret;
     }
     const generatePages = ()=>{
@@ -33,9 +31,9 @@ function Stack(props) {
         //to swap blocks ??? you give it new order_id
         
         let ret = [];
-        setSize(zoom);
         //for(let i=1;i<=70;i++){
-            ret.push(<div key='1' className='PageWrapper'><div className='PageInner'>{getBlocks()}</div></div>)
+        ret.push(<div key='1' className='PageWrapper'><div className='PageInner'>{getBlocks()}</div></div>)
+        ret.push(<span key='footer' style={{'height':'calc(1cm * var(--zoom))'}}></span>)
         //}
         return ret;
     }
@@ -46,26 +44,32 @@ function Stack(props) {
         }
     }
     const getStyle = ()=>{
-        let pageWidth = 210;
-        let pageHeight = 297;
-        if(stateNow.template.pageSize == 'A4'){
-            if(stateNow.template.pageOrientation == 'landscape'){
-                pageWidth = pageHeight;
-                pageHeight = 210;
-            }
-        }else if(stateNow.template.pageSize == 'A3'){
-            pageWidth = 297;
-            pageHeight = 420;
-            if(stateNow.template.pageOrientation == 'landscape'){
-                pageWidth = pageHeight;
-                pageHeight = 297;
+        const sizes = {
+            'A4':['210mm','297mm'],
+            'A3':['297mm','420mm'],
+        }
+        let pageWidth = sizes[stateNow.template.pageSize][(stateNow.template.pageOrientation == 'landscape')*1]
+        let pageHeight = sizes[stateNow.template.pageSize][(stateNow.template.pageOrientation !== 'landscape')*1]
+        const checkForZoom = (_val)=>{
+            _val+='';
+            if(_val){
+                if(_val.substr(-1,1) == '%'){
+                    return `${_val}`
+                }else{
+                    return `calc( ${_val} * var(--zoom) )`
+                }
+            }else{
+                return '';
             }
         }
         return {
             '--zoom':zoom/100,
-            '--page-wrapper-height':(pageHeight/100*zoom)+'mm',
-            '--page-wrapper-width':(pageWidth/100*zoom)+'mm',
-            '--page-margin-left':((stateNow.template.marginLeft)/100*zoom)+'mm'
+            '--page-wrapper-height':checkForZoom(pageHeight),
+            '--page-wrapper-width':checkForZoom(pageWidth),
+            '--page-margin-top':checkForZoom(stateNow.template.marginTop),
+            '--page-margin-bottom':checkForZoom(stateNow.template.marginBottom),
+            '--page-margin-left':checkForZoom(stateNow.template.marginLeft),
+            '--page-margin-right':checkForZoom(stateNow.template.marginRight),
         }
     }
     return (
