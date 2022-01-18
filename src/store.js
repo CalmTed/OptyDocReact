@@ -1,10 +1,12 @@
 import { createStore,combineReducers } from "redux";
-import templateReducer from "./reducers/templateReducer"
-import appReducer from "./reducers/appReducer"
+import templateReducer from "./reducers/templateReducer";
+import appReducer from "./reducers/appReducer";
+import copyReducer from "./reducers/copyReducer";
 
 const rootReducer = combineReducers({
   template: templateReducer,
-  app: appReducer
+  app: appReducer,
+  copies: copyReducer
 });
 
 const store = createStore(rootReducer)

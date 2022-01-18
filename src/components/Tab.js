@@ -1,4 +1,5 @@
 import React from 'react'
+import actionTypes from '../reducers/actionTypes';
 
 function Tab(props) {
     const state = props.store.getState();
@@ -8,14 +9,16 @@ function Tab(props) {
         if(state.app.tabSelected == props.tabValue){
             classes += 'active ';
         }
-        if(state.app.tabSelected)
         return classes
     }
     const handleClick = ()=>{
-        props.store.dispatch({type:"menu/tabSet",payload:props.tabValue})
+        props.store.dispatch({type:actionTypes.TAB_SET,payload:props.tabValue})
+    }
+    const handleKeyPress = (e)=>{
+        e.key == 'Enter'?handleClick():0;
     }
     return (
-    <div className={getClasses()} onClick={handleClick}>
+    <div className={getClasses()} onClick={handleClick} onKeyPress={handleKeyPress} tabIndex={props.tabIndex}>
         <span>{props.tabName}</span>
     </div>
     );

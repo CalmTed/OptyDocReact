@@ -1,4 +1,4 @@
-import store from "../store";
+import actionTypes from "./actionTypes";
 const getinitialState = () => {
     //SHORTCUT HERE for it to not to store localy
     if(window.localStorage.getItem('ODStore') == undefined){
@@ -17,6 +17,8 @@ const getinitialState = () => {
             marginTop:'0mm',
             marginBottom:'0mm',
             zoom:100,
+            fitsW:0,
+            fitsH:0,
             children:[]
         }  
       }else{
@@ -189,12 +191,13 @@ const templateReducer = (state = getinitialState(), action)=>{
     const isValidText = (_value)=>{
         return !/[<>\/{}|]/g.test(_value) && _value.length<500
     }
+    
     switch(action.type){
-        case 'template/newBlockAdd':
+        case actionTypes.TEMPLATE_NEW_BLOCK_ADD:
             return {...state,children:getNewChildrenList('newBlockAdd')}
-        case 'template/blockRemove':
+        case actionTypes.TEMPLATE_BLOCK_REMOVE:
             return {...state,children:getNewChildrenList('blockRemove')}
-        case 'template/zoomSet':
+        case actionTypes.ZOOM_SET:
             //TODO make if functional for scroll
             if(action.payload>=500){
                 action.payload=500
@@ -203,168 +206,180 @@ const templateReducer = (state = getinitialState(), action)=>{
                 action.payload=1;
             }
             return {...state,zoom:action.payload}
-        case 'template/nameSet':
+        case actionTypes.TEMPLATE_NAME_SET:    
             if(isValidText(action.payload) && action.payload.length < 40){
                 return {...state,name:action.payload}
             }else{
                 return state;
             }
-        case 'template/pageSizeSet':
+        case actionTypes.TEMPLATE_PAGE_SIZE_SET:
             if(isValidOption('pageSize',action.payload)){
                 return {...state,pageSize:action.payload}
             }else{
                 return state;
             }
-        case 'template/pageOrientationSet':
+        case actionTypes.TEMPLATE_PAGE_ORIENATION_SET:
             if(isValidOption('pageOrientation',action.payload)){
                 return {...state,pageOrientation:action.payload}
             }else{
                 return state;
             }
-        case 'template/marginTopSet':
+        case actionTypes.TEMPLATE_MARGIN_TOP_SET:
             if(isValidSize(action.payload)){
                 return {...state,marginTop:action.payload}
             }else{
                 return state;
             }
-        case 'template/marginBottomSet':
+        case actionTypes.TEMPLATE_MARGIN_BOTTOM_SET:
             if(isValidSize(action.payload)){
                 return {...state,marginBottom:action.payload}
             }else{
                 return state;
             }
-        case 'template/marginLeftSet':
+        case actionTypes.TEMPLATE_MARGIN_LEFT_SET:
             if(isValidSize(action.payload)){
                 return {...state,marginLeft:action.payload}
             }else{
                 return state;
             }
-        case 'template/marginRightSet':
+        case actionTypes.TEMPLATE_MARGIN_RIGHT_SET:
             if(isValidSize(action.payload)){
                 return {...state,marginRight:action.payload}
             }else{
                 return state;
             }
         //SELECTED BLOCK
-        case 'selectedBlock/innerTextSet':
+        case actionTypes.BLOCK_INNER_TEXT_SET:
             if(isValidText(action.payload)){
                 return {...state,children:getNewChildrenList('innerText')}
             }else{
                 return state;
             }
-        case 'selectedBlock/widthSet':
+        case actionTypes.BLOCK_WIDTH_SET:
             if(isValidSize(action.payload)){
                 return {...state,children:getNewChildrenList('width')}
             }else{
                 return state;
             };
-        case 'selectedBlock/heightSet':
+        case actionTypes.BLOCK_HEGHT_SET:
             if(isValidSize(action.payload)){
                 return {...state,children:getNewChildrenList('height')}
             }else{
                 return state;
             }
-        case 'selectedBlock/alignVerticalSet':
+        case actionTypes.BLOCK_ALIGN_VERTICAL_SET:
             if(isValidOption('alignVertical',action.payload)){
                 return {...state,children:getNewChildrenList('alignVertical')}
             }else{
                 return state;
             }
-        case 'selectedBlock/alignHorizontalSet':
+        case actionTypes.BLOCK_ALIGN_HORIZONTAL_SET:
             if(isValidOption('alignHorizontal',action.payload)){
                 return {...state,children:getNewChildrenList('alignHorizontal')}
             }else{
                 return state;
             }
-        case 'selectedBlock/displayTypeSet':
+        case actionTypes.BLOCK_DISPLAY_TYPE_SET:
             if(isValidOption('displayType',action.payload)){
                 return {...state,children:getNewChildrenList('displayType')}
             }else{
                 return state;
             }
-        case 'selectedBlock/marginTopSet':
+        case actionTypes.BLOCK_MARGIN_TOP_SET:
             if(isValidSize(action.payload)){
                 return {...state,children:getNewChildrenList('marginTop')}
             }else{
                 return state;
             }
-        case 'selectedBlock/marginBottomSet':
+        case actionTypes.BLOCK_MARGIN_BOTTOM_SET:
             if(isValidSize(action.payload)){
                 return {...state,children:getNewChildrenList('marginBottom')}
             }else{
                 return state;
             }
-        case 'selectedBlock/marginLeftSet':
+        case actionTypes.BLOCK_MARGIN_LEFT_SET:
             if(isValidSize(action.payload)){
                 return {...state,children:getNewChildrenList('marginLeft')}
             }else{
                 return state;
             }
-        case 'selectedBlock/marginRightSet':
+        case actionTypes.BLOCK_MARGIN_RIGHT_SET:
             if(isValidSize(action.payload)){
                 return {...state,children:getNewChildrenList('marginRight')}
             }else{
                 return state;
             }
-        case 'selectedBlock/fontFamilySet':
+        case actionTypes.BLOCK_FONT_FAMILY_SET:
             if(isValidOption('fontFamily',action.payload)){
                 return {...state,children:getNewChildrenList('fontFamily')}
             }else{
                 return state;
             }
-        case 'selectedBlock/fontSizeSet':
+        case actionTypes.BLOCK_FONT_SIZE_SET:
             //TODO validate payload
             if(isValidSize(action.payload)){
                 return {...state,children:getNewChildrenList('fontSize')}
             }else{
                 return state;
             }
-        case 'selectedBlock/fontColorSet':
+        case actionTypes.BLOCK_FONT_COLOR_SET:
             if(/#[0-9a-f]{6}/.test(action.payload)){
                 return {...state,children:getNewChildrenList('fontColor')}
             }else{
                 return state;
             }
-        case 'selectedBlock/backgroundColorSet':
+        case actionTypes.BLOCK_BACKGROUND_COLOR_SET:
             if(/#[0-9a-f]{6}/.test(action.payload)){
                 return {...state,children:getNewChildrenList('backgroundColor')}
             }else{
                 return state;
             }
-        case 'selectedBlock/fontBoldSet':
+        case actionTypes.BLOCK_FONT_BOLD_SET:
             if(isValidOption('fontBold',action.payload)){
                 return {...state,children:getNewChildrenList('fontBold')}
             }else{
                 return state;
             }
-        case 'selectedBlock/fontItalicSet':
+        case actionTypes.BLOCK_FONT_ITALIC_SET:
             if(isValidOption('fontItalic',action.payload)){
                 return {...state,children:getNewChildrenList('fontItalic')}
             }else{
                 return state;
             }
-        case 'selectedBlock/fontUnderlineSet':
+        case actionTypes.BLOCK_FONT_UNDERLINE_SET:
             if(isValidOption('fontUnderline',action.payload)){
                 return {...state,children:getNewChildrenList('fontUnderline')}
             }else{
                 return state;
             } 
-        case 'selectedBlock/copyChannelSet':
+        case actionTypes.BLOCK_COPY_CHANNEL_SET:
             if(isValidText(action.payload) && action.payload.length<10){
                 return {...state,children:getNewChildrenList('copyChannel')}
             }else{
                 return state;
             }
-        case 'selectedBlock/valueTypeSet':
+        case actionTypes.BLOCK_VALUE_TYPE_SET:
             //TODO validate payload
             if(isValidOption('valueType',action.payload)){
                 return {...state,children:getNewChildrenList('valueType')}
             }else{
                 return state;
             }
-        case 'selectedBlock/customStyleSet':
+        case actionTypes.BLOCK_CUSTOM_STYLE_SET:
             if(!/[{}*\/\\<>^?@&$~`|]/g.test(action.payload) && action.payload.length<500){
                 return {...state,children:getNewChildrenList('customStyle')}
+            }else{
+                return state;
+            }
+        case actionTypes.TEMPLATE_FITS_H_SET:
+            if(/^[\d]{1,10}$/.test(action.payload)){
+                return {...state,fitsH:action.payload}
+            }else{
+                return state;
+            }
+        case actionTypes.TEMPLATE_FITS_W_SET:
+            if(/^[\d]{1,10}$/.test(action.payload)){
+                return {...state,fitsW:action.payload}
             }else{
                 return state;
             }

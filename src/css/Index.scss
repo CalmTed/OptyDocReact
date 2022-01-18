@@ -1,4 +1,4 @@
-$transitionTime: .15s ease;
+$transitionTime: .15s;
 $menuWidth: 300px;
 $topMenuHeight:45px;
 $boxShadow: 0px 0px 4px 3px rgba(0, 0, 0, 0.05);
@@ -30,6 +30,7 @@ border: 1px solid transparent;
 }
 .Page{
     --main-color:rgb(3,97,236);
+    --background-gradient:radial-gradient(122.33% 114.92% at -22.33% 77%, var(--main-color) 0%, rgb(20, 171, 243) 100%);
     --secondary-color:rgb(163 163 163);
     --menu-backcolor:rgb(254,254,254);
     --stack-background:rgb(238,238,238);
@@ -39,7 +40,7 @@ border: 1px solid transparent;
     color: var(--text-color);
 }
 .Page.dark{
-    --main-color: rgb(3,97,236);
+    --main-color: rgb(236, 207, 3);
     --menu-backcolor: rgb(34 34 34);
     --stack-background: rgb(76 76 76);
     --text-color: rgb(199 199 199);
@@ -132,23 +133,25 @@ border: 1px solid transparent;
                 height: 6em;
                 width: 100%;
             }
-            input,select,textarea{
+            input,select,textarea,button{
                 padding:4px 5px;
-                padding: 4px 5px;
-                background: var(--menu-backcolor);
+                background: var(--stack-background);
                 color: var( --text-color);
                 border-radius: 2px;
-                border: 1px solid var(--secondary-color);
+                border: 1px solid transparent;
                 font-family: inherit;
+                &:focus{
+                    outline-color: var(--main-color);
+                    outline-width: 1px;
+                }
             }
+
             input.size{
                 width: 5em;
             }
             .color{
                 -webkit-appearance: none;
-                border: none;
                 // border-radius: 2px;
-                border: 1px solid var(--secondary-color);
                 // width: 32px;
                 // height: 32px;
                 &::-webkit-color-swatch-wrapper {
@@ -158,6 +161,54 @@ border: 1px solid transparent;
                     border: none;
                 }
             }
+            button{
+                padding: 6px 8px;
+                display: flex;
+                align-items: center;
+                span{
+                    width: max-content;
+                    margin: 0 .5em;
+                    transition: none;
+                }
+                &:hover{
+                    cursor: pointer;
+                    color: var(--main-color);
+                    .maincolor-stroke{
+                        transition: all $transitionTime;
+                        stroke: var(--main-color);
+                    }
+                }
+                &.primary{
+                    color: var(--menu-backcolor);
+                    border-color: var(--menu-color);
+                    background: var(--background-gradient);
+                    .maincolor-stroke{
+                        stroke: var(--menu-backcolor);
+                    }
+                }
+            }
+            &.file{
+                width: max-content;
+                .fileinput{
+                    display: flex;
+                    align-items: center;
+                    padding: 6px 8px;
+                    background: var(--background-gradient);
+                    color: var(--menu-backcolor);
+                    border-radius: 2px;
+                    // border: 1px solid var(--main-color);
+                    .maincolor-stroke{
+                        stroke: var(--menu-backcolor);
+                    }
+                    &:hover{
+                        cursor: pointer;
+                    }
+                    span{
+                        margin: 0 .5em;
+                    }
+                }
+            }
+
             
         }  
         .spacer{
@@ -239,8 +290,17 @@ border: 1px solid transparent;
     //TODO somehow center pages list but on big scale align left
     //TODO align last line of pages to the left
     justify-content: flex-start;
-
     align-content: flex-start;
+    &:focus{
+    outline-color: var(--main-color);
+    }
+    .stackPlaceholder{
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
     .PageWrapper{
         transition: all $transitionTime;
         height: var(--page-wrapper-height);
@@ -261,12 +321,15 @@ border: 1px solid transparent;
         background-color: var(--paper-backcolor);
         // word-break: break-all;
         font-size: calc(20px * var(--zoom));
-        display: block;
-        .Block{        
+        display: flex;
+        flex-wrap: wrap;
+        align-content: flex-start;
+        justify-content: flex-start;
+        .Block{   
+                 
             transition: all $transitionTime;
             --block-border:1px dashed transparent;
             --selected-border:1px dashed var(--main-color);
-            // padding:10px;
             // VARIABLES
             outline: var(--block-border);
             width:calc(var(--block-width) - var(--block-marginLeft) - var(--block-marginRight));
@@ -302,6 +365,9 @@ border: 1px solid transparent;
             font-weight: var(--block-fontBold);
             font-style: var(--block-fontItalic);
             text-decoration: var(--block-fontUnderline);
+            &:focus{
+                --block-border:1px dashed var(--secondary-color);
+            }
             &:hover{
                 --block-border:1px dashed var(--secondary-color);
             }

@@ -1,6 +1,6 @@
 import React from 'react'
 import Icon from './Icon';
-
+import actionTypes from '../reducers/actionTypes';
 function Topbutton(props) {
     var disabled = false;
     if(props.disabled){
@@ -25,16 +25,19 @@ function Topbutton(props) {
         const _blockSelected = props.store.getState().app.blockSelected;
         switch(props.name){
             case 'settings':
-                props.store.dispatch({type:'colorMode/colormodeToggle',payload:''});
+                props.store.dispatch({type:actionTypes.COLORMODE_TOGGLE,payload:''});
                 break;
             case 'newBlock':
-                props.store.dispatch({type:'template/newBlockAdd',payload:'',blockSelected:_blockSelected});
+                props.store.dispatch({type:actionTypes.TEMPLATE_NEW_BLOCK_ADD,payload:'',blockSelected:_blockSelected});
                 break;
             case 'removeBlock':
-                props.store.dispatch({type:'stack/selectedBlockSet',payload:''})
-                props.store.dispatch({type:'template/blockRemove',payload:'',blockSelected:_blockSelected});
+                props.store.dispatch({type:actionTypes.SELECTEDBLOCK_SET,payload:''})
+                props.store.dispatch({type:actionTypes.TEMPLATE_BLOCK_REMOVE,payload:'',blockSelected:_blockSelected});
                 break;
         }
+    }
+    const handleKeyPress = (e)=>{
+        e.key == 'Enter'?handleClick():0;
     }
     const getIcon = ()=>{
         if(props.name == 'settings'){
@@ -48,7 +51,7 @@ function Topbutton(props) {
         }
     }
     return (
-    <div className={'Topbutton'+ ' tbtn-'+props.name + ' '+ isDisabled()} onClick={handleClick}>
+    <div className={'Topbutton'+ ' tbtn-'+props.name + ' '+ isDisabled()} tabIndex={!disabled?'7':''} onClick={handleClick} onKeyPress={handleKeyPress} title={props.name}>
         {getIcon()}
     </div>
     );

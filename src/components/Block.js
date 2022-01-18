@@ -1,5 +1,5 @@
 import React from 'react'
-
+import actionTypes from '../reducers/actionTypes';
 function Block(props) {
     const stateNow = props.store.getState();  
     const blockData = props.blockData;
@@ -15,22 +15,40 @@ function Block(props) {
                     _ret.push(_innerText);
                 }else{
                     if(_props.blockData.valueType == 'selector'){
-                        _ret.push(<p key={_props.blockData.uuid} id={_props.blockData.uuid}>{_innerText.split('\n')[0]}</p>)
+                        _ret.push(<p key={_props.blockData.uuid} id={_props.blockData.uuid+'_p'}>{_innerText.split('\n')[0]}</p>)
                     }else{
                         _innerText.split('\n').forEach((_line,i)=>{
-                            _ret.push(<p key={i} id={_props.blockData.uuid}>{_line}</p>)
+                            _ret.push(<p key={i} id={_props.blockData.uuid+'_p'}>{_line}</p>)
                         })
                     }
                 }
                 return _ret;
             }
             if(_props.blockData.copyChannel == _props.blockData.humanfriendlyID){
-                ret = [...formatInnerText(_props.blockData.innerText)];
-            }else{//get inner text from different block
+                
+                if(typeof props.copyIndex != 'undefined'){//if it is a copy
+                    let _foundColumn = false;
+                    stateNow.copies.columns.forEach((col,ci)=>{//loop for columns
+                        if(blockData.humanfriendlyID == col.title){//if its a block with same hfid
+                            ret.push(<span key='acopy'>{stateNow.copies.rows[props.copyIndex+1][ci]}</span>)
+                            _foundColumn = true;
+                        }
+                    })
+                    if(!_foundColumn){
+                        ret.push(<span key='acopytext'>{blockData.innerText}</span>);
+                    }
+                }else{
+                    
+                    //writing its own text
+                    //TODO check for copylink
+                    ret = [...formatInnerText(_props.blockData.innerText)];
+                }
+            }else{
+                //get inner text from different block
                 const blockToCopyFrom = ()=>{
                     let __ret = _props.store.getState().template.children.filter(ch=>{return ch.humanfriendlyID == _props.blockData.copyChannel});
                     if(__ret.length){
-                        return __ret[0] 
+                        return __ret[0];
                     }else{
                         return _props.blockData;
                     }
@@ -40,8 +58,14 @@ function Block(props) {
             
         }else{
             //if there`re some children, show them
-            hisChildern.forEach(childBlock => {
-                ret.push(<Block key={childBlock.uuid} blockData={childBlock} store={_props.store}/>)
+            
+        
+        hisChildern.forEach(childBlock => {
+                if(typeof props.copyIndex != 'undefined'){
+                    ret.push(<Block key={`${blockData.uuid}_${props.copyIndex}`} blockData={childBlock} store={_props.store} copyIndex={props.copyIndex}/>)
+                }else{
+                    ret.push(<Block key={childBlock.uuid} blockData={childBlock} store={_props.store}/>)
+                }
             });
         }
         return ret;
@@ -97,7 +121,7 @@ function Block(props) {
         })
         //custom styles
         blockStyle.customStyle.split('\n').forEach(s=>{
-            const _s = s.split(':');        
+            const _s = s.split(':')      
             if(/^(\w|-){2,20}$/.test(_s[0]) && !/[\[\]{};:]|\d/.test(_s[0]) && !/[\[\]{};:]/.test(_s[1])){
                 //convering to camelCase
                 if(_s[0].indexOf('-') >-1){
@@ -116,12 +140,26 @@ function Block(props) {
             const clickedBlockId = e.target.id;
             const clickedBlock = stateNow.template.children.filter(ch=>{return ch.uuid == clickedBlockId})[0]
             // const selectedBlock = stateNow.template.children.filter(ch=>{return ch.uuid == stateNow.app.blockSelected})[0]
-            props.store.dispatch({type:'stack/selectedBlockSet',payload:clickedBlock.uuid})
+            props.store.dispatch({type:actionTypes.SELECTEDBLOCK_SET,payload:clickedBlock.uuid})
         }
     }
+    const handleKeyPress = (e)=>{
+        e.key=='Enter'?handleClick(e):0;
+    }
+    const getKey = ()=>{
+        if(typeof props.copyIndex != 'undefined'){
+            return `${blockData.uuid}_${props.copyIndex}`
+        }
+        return blockData.uuid;
+    }
+    const getTitle = ()=>{
+        if(stateNow.app.tabSelected == 'copy'){
+            return `Copy ${props.copyIndex}`
+        }
+        return blockData.humanfriendlyID;
+    }
     return (
-    <div id={blockData.uuid} key={blockData.uuid} className="Block" style={getStyle()} onClick={handleClick} title={blockData.humanfriendlyID}>
-        
+    <div id={getKey()} key={getKey()} className="Block" style={getStyle()} onClick={handleClick} onKeyPress={handleKeyPress} tabIndex='10' title={getTitle()}>
         {getBlocks(props)}
     </div>
     );

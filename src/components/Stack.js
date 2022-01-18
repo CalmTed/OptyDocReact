@@ -1,3 +1,4 @@
+import actionTypes from '../reducers/actionTypes';
 import React from 'react'
 import Block from './Block';
 function Stack(props) {
@@ -17,6 +18,17 @@ function Stack(props) {
         
         return ret;
     }
+    const getCopies = (_startFrom = 0,_perPage = Infinity)=>{
+        let ret = [];
+        stateNow.copies.rows.filter((r,i)=>{return i!=0}).forEach((row,ci)=>{
+            if(ci>=_startFrom && ci < _startFrom+_perPage){
+                stateNow.template.children.filter(ch=>{return ch.parentID == ''}).forEach(childBlock => {
+                    ret.push(<Block key={`${childBlock.uuid}_${ci}`} blockData={childBlock} store={props.store} copyIndex={ci}/>)
+                });
+            }
+        })
+        return ret;
+    }
     const generatePages = ()=>{
         //SHOWiNG
         //if there is no blocks create empty page
@@ -29,18 +41,41 @@ function Stack(props) {
         //on creating select block
         //create block inside selected object(template or another block)
         //to swap blocks ??? you give it new order_id
-        
         let ret = [];
-        //for(let i=1;i<=70;i++){
-        ret.push(<div key='1' className='PageWrapper'><div className='PageInner'>{getBlocks()}</div></div>)
-        ret.push(<span key='footer' style={{'height':'calc(1cm * var(--zoom))'}}></span>)
-        //}
+        switch(stateNow.app.tabSelected){
+            case 'edit':
+                ret.push(<div key='1' className='PageWrapper'><div className='PageInner'>{getBlocks()}</div></div>)
+                break;
+            case 'copy':
+                if(stateNow.copies.rows.length == 0){
+                    ret.push(<h1 key='placeholder' className='stackPlaceholder'>No copy to show</h1>)
+                }else{
+                    //get copies rows length / copies per page
+                    let fitsOnPage = stateNow.template.fitsH*stateNow.template.fitsW;
+                    let pagesNeeded = stateNow.copies.rows.length / fitsOnPage;
+                    if(fitsOnPage>0&&pagesNeeded>1){
+                        for(let copyPageIndex=0;copyPageIndex<pagesNeeded;copyPageIndex++){
+                            ret.push(<div key={'copyPage'+copyPageIndex} className='PageWrapper'><div className='PageInner'>{getCopies(fitsOnPage*copyPageIndex,fitsOnPage)}</div></div>)
+                        }
+                    }else{
+                        ret.push(<div key='1' className='PageWrapper'><div className='PageInner'>{getCopies()}</div></div>)
+                    }
+                }
+                break;
+            case 'print':
+                ret.push(<h1 key='placeholder' className='stackPlaceholder'>Nothing to print</h1>)
+                break;
+            default:
+                ret.push(<h1 key='placeholder'   className='stackPlaceholder'>No tab selected</h1>)
+                break;
+        }
+        
         return ret;
     }
     const handleClick = (e)=>{
         // unselect Block
         if(e.target.classList.contains('Stack')){
-            props.store.dispatch({type:'stack/selectedBlockSet',payload:''})
+            props.store.dispatch({type:actionTypes.SELECTEDBLOCK_SET,payload:''})
         }
     }
     const getStyle = ()=>{
@@ -73,7 +108,7 @@ function Stack(props) {
         }
     }
     return (
-    <div className="Stack" onClick={handleClick} style={getStyle()}>
+    <div className="Stack" onClick={handleClick} onKeyPress={(e)=>{e.key=='Enter'?handleClick(e):0}} tabIndex='8' style={getStyle()}>
         {generatePages()}
     </div>
     );

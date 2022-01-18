@@ -1,0 +1,48 @@
+const actionTypes = {
+    COLORMODE_SET:'colorMode/colormodeSet',
+    COLORMODE_TOGGLE:'colormodeToggle',
+    TAB_SET:'menu/tabSet',
+    SELECTEDBLOCK_SET:'stack/selectedBlockSet',
+
+    TEMPLATE_NEW_BLOCK_ADD:'template/newBlockAdd',
+    TEMPLATE_BLOCK_REMOVE:'template/blockRemove',
+    ZOOM_SET:'template/zoomSet',
+    TEMPLATE_NAME_SET:'template/nameSet',
+    TEMPLATE_PAGE_SIZE_SET:'template/pageSizeSet',
+    TEMPLATE_PAGE_ORIENATION_SET:'template/pageOrientationSet',
+    TEMPLATE_MARGIN_TOP_SET:'template/marginTopSet',
+    TEMPLATE_MARGIN_BOTTOM_SET:'template/marginBottomSet',
+    TEMPLATE_MARGIN_LEFT_SET:'template/marginLeftSet',
+    TEMPLATE_MARGIN_RIGHT_SET:'template/marginRightSet',
+    TEMPLATE_FITS_W_SET:'template/fitsWSet',
+    TEMPLATE_FITS_H_SET:'template/fitsHSet',
+
+    BLOCK_INNER_TEXT_SET:'selectedBlock/innerTextSet',
+    BLOCK_WIDTH_SET:'selectedBlock/widthSet',
+    BLOCK_HEGHT_SET:'selectedBlock/heightSet',
+    BLOCK_ALIGN_VERTICAL_SET:'selectedBlock/alignVerticalSet',
+    BLOCK_ALIGN_HORIZONTAL_SET:'selectedBlock/alignHorizontalSet',
+    BLOCK_DISPLAY_TYPE_SET:'selectedBlock/displayTypeSet',
+    BLOCK_MARGIN_TOP_SET:'selectedBlock/marginTopSet',
+    BLOCK_MARGIN_BOTTOM_SET:'selectedBlock/marginBottomSet',
+    BLOCK_MARGIN_LEFT_SET:'selectedBlock/marginLeftSet',
+    BLOCK_MARGIN_RIGHT_SET:'selectedBlock/marginRightSet',
+    BLOCK_BACKGROUND_COLOR_SET:'selectedBlock/backgroundColorSet',
+    BLOCK_FONT_FAMILY_SET:'selectedBlock/fontFamilySet',
+    BLOCK_FONT_SIZE_SET:'selectedBlock/fontSizeSet',
+    BLOCK_FONT_COLOR_SET:'selectedBlock/fontColorSet',
+    BLOCK_FONT_BOLD_SET:'selectedBlock/fontBoldSet',
+    BLOCK_FONT_ITALIC_SET:'selectedBlock/fontItalicSet',
+    BLOCK_FONT_UNDERLINE_SET:'selectedBlock/fontUnderlineSet',
+    BLOCK_COPY_CHANNEL_SET:'selectedBlock/copyChannelSet',
+    BLOCK_VALUE_TYPE_SET:'selectedBlock/valueTypeSet',
+    BLOCK_CUSTOM_STYLE_SET:'selectedBlock/customStyleSet',
+
+
+    COPIES_DATA_SET:'copies/dataSet',
+    COPIES_COLUMN_ADD:'copies/columnAdd',
+    COPIES_COLUMN_REMOVE:'copies/columnRemove',
+    COPIES_COLUMNS_SET:'copies/columnSet',
+}
+
+export default actionTypes;
