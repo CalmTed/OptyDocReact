@@ -67,7 +67,7 @@ function Menuitem(props) {
                     return arr;
                 }
                 // console.log(_fileText)
-                let _formatedTableData = parseCSV(_fileText);
+                let _formatedTableData = parseCSV(_fileText)
                 //read first line
                 
                 //check length of all rows
@@ -80,7 +80,11 @@ function Menuitem(props) {
                     });
                     if(_valid){
                         props.store.dispatch({type:_actionType ,payload:_formatedTableData});
+                    }else{
+                        console.log('invalid table')
                     }
+                }else{
+                    console.log('wrong size')
                 }
             }                        
             fr.readAsText(_file);
@@ -91,14 +95,13 @@ function Menuitem(props) {
             switch(valueMI[1]){
                 case 'uploadCSV':
                     uploadFile(e,props.fileType,actionTypes.COPIES_DATA_SET)
-                    break
+                    break;
                 case 'downloadCSV':
                     const saveTable = (_textToSave,_fileName)=> {
                         let _link = document.createElement("a");
                         document.body.appendChild(_link);
                         _link.style = "display: none";
-                        let _blob = new Blob([_textToSave], {type: "octet/csv"});
-                        let _url = window.URL.createObjectURL(_blob);
+                        let _url = "data:text/csv;charset=utf-8,%EF%BB%BF"+ encodeURI(_textToSave);
                         _link.href = _url;
                         _link.download = _fileName;
                         _link.click();
@@ -108,9 +111,10 @@ function Menuitem(props) {
                         return col.title;
                     })
                     const columnsRows = stateNow.copies.rows[0];
-                    let _tts = columnsTitles;
-                    if(compareArr(columnsTitles,columnsRows)){
-                        _tts = stateNow.copies.rows.map(row=>{
+                    let _tts = columnsTitles;//"table to save"
+                    if(columnsTitles.length,columnsRows.length){
+                        //safe saving cells with commas
+                        _tts = _tts.concat(stateNow.copies.rows.map(row=>{
                             let _ret = row.map(cell=>{
                                 let __ret = cell;
                                 if(cell.indexOf(',') > -1){
@@ -119,24 +123,50 @@ function Menuitem(props) {
                                 return __ret;
                             }).join(',')
                             return _ret;
-                        }).join('\r\n');
+                        })).join('\r\n')
                     }
                     saveTable(_tts,stateNow.template.name+'_table.csv')
                     break;
+                case 'addCopyRow':
+                    let _newRowToAdd = ()=>{
+                        return stateNow.copies.columns.map((col)=>{
+                            if(col.type == 'selector'){
+                                return col.options[0];
+                            }else if (col.type == 'variable'){
+                                return stateNow.template.children.filter(ch=>{return ch.uuid == col.target})[0].innerText;
+                            }else{
+                                return col.title;
+                            }
+                        })
+                    }
+                    props.store.dispatch({type:actionTypes.COPIES_ROW_ADD,payload:_newRowToAdd(),copySelected:stateNow.app.copySelected})
+                    break;
+                case 'removeCopyRow':
+                    props.store.dispatch({type:actionTypes.COPIES_ROW_REMOVE,payload:stateNow.app.copySelected})
+                    break;
+                case 'print':
+                    window.print();
+                break;
                 default:break;
             }
         }else{
+            //manual action handling
             if(props.action){
-                props.store.dispatch({type:props.action,payload:e.target.value,blockSelected:stateNow.app.blockSelected})
+                if(stateNow.app.tabSelected == 'edit'){
+                    props.store.dispatch({type:props.action,payload:e.target.value,blockSelected:stateNow.app.blockSelected})
+                }else if(stateNow.app.tabSelected == 'copy'){
+                    props.store.dispatch({type:props.action,payload:e.target.value,copySelected:stateNow.app.copySelected,columnSelected:props.columnSelected})
+                }
+                //changing selectedBlock
                 if(stateNow.app.blockSelected != ''){
                     let selectedBlockObject = stateNow.template.children.filter((b)=>{return b.uuid == stateNow.app.blockSelected})[0]
                     //editing copies columns table
                     if(
-                        ((props.action == actionTypes.BLOCK_INNER_TEXT_SET)||(props.action == actionTypes.BLOCK_VALUE_TYPE_SET))
+                        ((props.action == actionTypes.BLOCK_INNER_TEXT_SET)||(props.action == actionTypes.BLOCK_VALUE_TYPE_SET)||(props.action == actionTypes.BLOCK_VARIABLE_TITLE_SET))
                         ){
                         //loop through all children and find ones that have variable and selectors
                         let variablesListObjects = stateNow.template.children.filter((b)=>{
-                            return ['selector','variable'].indexOf(b.valueType) >-1
+                            return ['selector','variable','date'].indexOf(b.valueType) >-1
                         })
                         let columnsObject = (variablesListObjects)=>{
                             let ret = [];
@@ -148,12 +178,13 @@ function Menuitem(props) {
                                     _options = obj.innerText.split('\n');
                                 }
                                 ret.push({
-                                    title:obj.uuid+'',
-                                    title:obj.humanfriendlyID,
+                                    target:obj.uuid+'',
+                                    title:obj.variableTitle,
                                     type:_type,
                                     options:_options
                                 })
                             })
+                            
                             return ret;
                         }
                         props.store.dispatch({type:actionTypes.COPIES_COLUMNS_SET,payload:columnsObject(variablesListObjects)   })
@@ -185,10 +216,10 @@ function Menuitem(props) {
 
                         let blockOuterWidth = farthestWidth - parseInt(pageDomObjStyle.paddingLeft) - pageDomObj.offsetLeft +1;
                         let blockOuterHeight = farthestHeight - parseInt(pageDomObjStyle.paddingTop) - pageDomObj.offsetTop +1;
-                        console.log('name','width','height')
-                        console.log('page',pageInnerWidth,pageInnerHeight)
-                        console.log('block',blockOuterWidth,blockOuterHeight)
-                        console.log('diff',pageInnerWidth/blockOuterWidth,pageInnerHeight/blockOuterHeight)
+                        // console.log('name','width','height')
+                        // console.log('page',pageInnerWidth,pageInnerHeight)
+                        // console.log('block',blockOuterWidth,blockOuterHeight)
+                        // console.log('diff',pageInnerWidth/blockOuterWidth,pageInnerHeight/blockOuterHeight)
                         let fitW = Math.floor(pageInnerWidth / blockOuterWidth);
                         let fitH = Math.floor(pageInnerHeight / blockOuterHeight);
                         if(fitW ==0 && Math.abs(pageInnerWidth - blockOuterWidth) < 5){//some error is ok for flex
@@ -203,6 +234,8 @@ function Menuitem(props) {
                         props.store.dispatch({type:actionTypes.TEMPLATE_FITS_H_SET,payload:fitH})
                     },500)
                 }
+            }else{
+                console.warn('No action specify')
             }
         }
     }
@@ -220,6 +253,18 @@ function Menuitem(props) {
                 }else if(selectedBlockObject.style[valueMI[1]]){
                     ret = selectedBlockObject.style[valueMI[1]];
                 }else{  }
+            }
+            if(valueMI[0] == 'selectedCopy'){
+                let _selectedColumnID = 0;
+                stateNow.copies.columns.forEach((c,i)=>{
+                    if(c.target == props.columnSelected){
+                        _selectedColumnID = i;
+                    }
+                })
+                //TODO if copyIndex if undefined
+                if(stateNow.copies.rows[stateNow.app.copySelected]!= undefined){
+                    ret = stateNow.copies.rows[stateNow.app.copySelected][_selectedColumnID]
+                }
             }
             if(stateNow[valueMI[0]]){
                 ret =  stateNow[valueMI[0]][valueMI[1]];
@@ -249,10 +294,14 @@ function Menuitem(props) {
                     let selectedBlockID = stateNow.app.blockSelected;
                     targetObject = stateNow.template.children.filter((b)=>{return b.uuid == selectedBlockID})[0]
                 }
-                if(targetObject[miOptionsName]){
-                    _options = targetObject[miOptionsName];
-                }else if(targetObject.style[miOptionsName]){
-                    _options = targetObject.style[miOptionsName];
+                if(typeof props.options == 'undefined' || props.options.length == 0){
+                    if(targetObject[miOptionsName]){
+                        _options = targetObject[miOptionsName];
+                    }else if(targetObject.style[miOptionsName]){
+                        _options = targetObject.style[miOptionsName];
+                    }
+                }else{
+                    _options = props.options;
                 }
                 let options = _options.map(([title,optionValue],index)=>{
                     return <option key={index} value={optionValue}>{title}</option>

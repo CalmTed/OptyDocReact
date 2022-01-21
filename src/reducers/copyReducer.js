@@ -3,12 +3,7 @@ const getinitialState = () => {
     if(window.localStorage.getItem('ODStore') == undefined){
         return  {
             //data for copy values: name, title, type, options
-            columns:[{
-                title:'',
-                target:'',
-                type:'',
-                options:''
-            }],
+            columns:[],
             //with title row
             rows:[]
         }  
@@ -45,7 +40,7 @@ const copyReducer = (state = getinitialState(), action)=>{
                     }
                 })
                 if(_valid){
-                    _ret = {...state,rows:_payload}   
+                    _ret = {...state,rows:_payload.slice(1)}   
                 }
             }
             return _ret;
@@ -56,15 +51,53 @@ const copyReducer = (state = getinitialState(), action)=>{
         case actionTypes.COPIES_COLUMNS_SET:
             if(typeof action.payload == 'object'){
                 let _valid = true;
-                action.payload.forEach(col=>{
-                    
-                    ['target','title','options','type'].forEach(prop=>{
-                        _valid = typeof col[prop] == 'undefined'?false:true;
-                    })
+                action.payload.forEach(c=>{
+                    _valid = Object.keys(c).join(',') == 'target,title,type,options'?true:false;
                 })
                 if(_valid){
                     return {...state,columns:action.payload}
+                }else{
+                    
+                    console.warn('invalid cols',Object.keys(action.payload).join(','), 'target,title,type,options')
                 }
+            }
+            return state;
+        case actionTypes.COPIES_ROW_ADD:
+            if(typeof action.payload == 'object' && typeof action.copySelected != 'undefined'){
+                if(action.payload.length == state.columns.length){
+                    let _newRows = [...state.rows];
+                    if(action.copySelected === ''){
+                        _newRows.splice(0,0,action.payload)
+                    }else if(action.copySelected*1<state.rows.length){
+                        _newRows.splice((action.copySelected*1)+1,0,action.payload)
+                    }else{
+                        _newRows.push(action.payload);
+                    }
+                    //
+                    return {...state,rows:_newRows}
+                }else{
+                    console.debug('invalid payload of new copy row')
+                }
+            }
+            return state;
+        case actionTypes.COPIES_ROW_REMOVE:
+            if(typeof action.payload != 'undefined'){
+                return {...state,rows:state.rows.filter((r,i)=>{return i+''!=action.payload+''})}
+            }
+            return state;
+        case actionTypes.COPIES_ROW_SET:
+            if(typeof action.payload != 'undefined' && typeof action.copySelected != 'undefined' && typeof action.columnSelected != 'undefined'){
+                let _selectedColumnID = 0;
+                state.columns.forEach((c,i)=>{
+                    if(c.target == action.columnSelected){
+                        _selectedColumnID = i;
+                    }
+                })
+                let _newRows = [...state.rows];
+                _newRows[action.copySelected][_selectedColumnID] = action.payload;
+                return {...state,rows:_newRows}
+            }else{
+                console.debug('invalid payload to change row')
             }
             return state;
         default:

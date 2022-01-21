@@ -10,7 +10,8 @@ const getinitialState = () => {
             languageWords:{},
             tabSelected:'',
             tabSelectedOptions:[['Edit','edit'],['Copy','copy'],['Print','print']],
-            blockSelected:'' 
+            blockSelected:'',
+            copySelected:'',
         }  
       }else {
         console.debug('Getting app data from localstorage')
@@ -38,6 +39,13 @@ const appReducer = (state = getinitialState(), action)=>{
              
             if(typeof action.payload != 'undefined'){
                 return {...state,blockSelected:action.payload}; 
+            }else{
+                return state;
+            }
+        case actionTypes.SELECTEDCOPY_SET:
+            
+            if(typeof action.payload != 'undefined'){
+                return {...state,copySelected:action.payload}; 
             }else{
                 return state;
             }

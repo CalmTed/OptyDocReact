@@ -4,6 +4,8 @@ import Block from './Block';
 function Stack(props) {
     const stateNow = props.store.getState();
     const zoom = stateNow.template.zoom;
+    const fitsOnPage = stateNow.template.fitsH*stateNow.template.fitsW;
+    const pagesNeeded = stateNow.copies.rows.length / fitsOnPage;
     const getBlocks = ()=>{
         let ret = [];
         if(stateNow.template.children.length == 0){//no children
@@ -15,12 +17,11 @@ function Stack(props) {
                 ret.push(<Block key={childBlock.uuid} blockData={childBlock} store={props.store}/>)
             });
         }
-        
         return ret;
     }
     const getCopies = (_startFrom = 0,_perPage = Infinity)=>{
         let ret = [];
-        stateNow.copies.rows.filter((r,i)=>{return i!=0}).forEach((row,ci)=>{
+        stateNow.copies.rows.filter((r,i)=>{return true}).forEach((row,ci)=>{
             if(ci>=_startFrom && ci < _startFrom+_perPage){
                 stateNow.template.children.filter(ch=>{return ch.parentID == ''}).forEach(childBlock => {
                     ret.push(<Block key={`${childBlock.uuid}_${ci}`} blockData={childBlock} store={props.store} copyIndex={ci}/>)
@@ -47,12 +48,9 @@ function Stack(props) {
                 ret.push(<div key='1' className='PageWrapper'><div className='PageInner'>{getBlocks()}</div></div>)
                 break;
             case 'copy':
-                if(stateNow.copies.rows.length == 0){
-                    ret.push(<h1 key='placeholder' className='stackPlaceholder'>No copy to show</h1>)
-                }else{
+            case 'print':
+                if(stateNow.copies.rows.length != 0 && stateNow.copies.columns.length != 0){
                     //get copies rows length / copies per page
-                    let fitsOnPage = stateNow.template.fitsH*stateNow.template.fitsW;
-                    let pagesNeeded = stateNow.copies.rows.length / fitsOnPage;
                     if(fitsOnPage>0&&pagesNeeded>1){
                         for(let copyPageIndex=0;copyPageIndex<pagesNeeded;copyPageIndex++){
                             ret.push(<div key={'copyPage'+copyPageIndex} className='PageWrapper'><div className='PageInner'>{getCopies(fitsOnPage*copyPageIndex,fitsOnPage)}</div></div>)
@@ -60,10 +58,9 @@ function Stack(props) {
                     }else{
                         ret.push(<div key='1' className='PageWrapper'><div className='PageInner'>{getCopies()}</div></div>)
                     }
+                }else{
+                        ret.push(<h1 key='placeholder' className='stackPlaceholder'>No copy to show</h1>)
                 }
-                break;
-            case 'print':
-                ret.push(<h1 key='placeholder' className='stackPlaceholder'>Nothing to print</h1>)
                 break;
             default:
                 ret.push(<h1 key='placeholder'   className='stackPlaceholder'>No tab selected</h1>)
@@ -75,16 +72,22 @@ function Stack(props) {
     const handleClick = (e)=>{
         // unselect Block
         if(e.target.classList.contains('Stack')){
-            props.store.dispatch({type:actionTypes.SELECTEDBLOCK_SET,payload:''})
+            if(stateNow.app.tabSelected == 'edit'){
+                props.store.dispatch({type:actionTypes.SELECTEDBLOCK_SET,payload:''})
+            }else if(stateNow.app.tabSelected == 'copy'){
+                props.store.dispatch({type:actionTypes.SELECTEDCOPY_SET,payload:''})
+            }
         }
+        
     }
     const getStyle = ()=>{
         const sizes = {
-            'A4':['210mm','297mm'],
-            'A3':['297mm','420mm'],
+            'A5':['148mm','209.9mm'],
+            'A4':['210mm','297.1mm'],
+            'A3':['297mm','419.9mm'],
         }
-        let pageWidth = sizes[stateNow.template.pageSize][(stateNow.template.pageOrientation == 'landscape')*1]
-        let pageHeight = sizes[stateNow.template.pageSize][(stateNow.template.pageOrientation !== 'landscape')*1]
+        let pageWidth = sizes[stateNow.template.pageSize][(stateNow.template.pageOrientation == 'landscape')*1];
+        let pageHeight = sizes[stateNow.template.pageSize][(stateNow.template.pageOrientation !== 'landscape')*1];
         const checkForZoom = (_val)=>{
             _val+='';
             if(_val){
@@ -97,7 +100,7 @@ function Stack(props) {
                 return '';
             }
         }
-        return {
+        let _ret = {
             '--zoom':zoom/100,
             '--page-wrapper-height':checkForZoom(pageHeight),
             '--page-wrapper-width':checkForZoom(pageWidth),
@@ -105,7 +108,15 @@ function Stack(props) {
             '--page-margin-bottom':checkForZoom(stateNow.template.marginBottom),
             '--page-margin-left':checkForZoom(stateNow.template.marginLeft),
             '--page-margin-right':checkForZoom(stateNow.template.marginRight),
+            // '--stack-height':`calc(${pagesNeeded} * ${pageHeight})`
         }
+        if(stateNow.app.tabSelected == 'print'){
+            _ret['--stack-height'] = `calc(${pagesNeeded} * ${pageHeight})`;
+            _ret['--text-color'] = `rgb(26, 26, 26)`;
+            _ret['--menu-backcolor'] = `rgb(254,254,254)`;
+            _ret['--paper-backcolor'] = `var(--menu-backcolor)`;
+        }
+        return _ret;
     }
     return (
     <div className="Stack" onClick={handleClick} onKeyPress={(e)=>{e.key=='Enter'?handleClick(e):0}} tabIndex='8' style={getStyle()}>

@@ -3,6 +3,7 @@ const actionTypes = {
     COLORMODE_TOGGLE:'colormodeToggle',
     TAB_SET:'menu/tabSet',
     SELECTEDBLOCK_SET:'stack/selectedBlockSet',
+    SELECTEDCOPY_SET:'stack/selectedCopySet',
 
     TEMPLATE_NEW_BLOCK_ADD:'template/newBlockAdd',
     TEMPLATE_BLOCK_REMOVE:'template/blockRemove',
@@ -36,6 +37,7 @@ const actionTypes = {
     BLOCK_FONT_UNDERLINE_SET:'selectedBlock/fontUnderlineSet',
     BLOCK_COPY_CHANNEL_SET:'selectedBlock/copyChannelSet',
     BLOCK_VALUE_TYPE_SET:'selectedBlock/valueTypeSet',
+    BLOCK_VARIABLE_TITLE_SET:'selectedBlock/variableTitleSet',
     BLOCK_CUSTOM_STYLE_SET:'selectedBlock/customStyleSet',
 
 
@@ -43,6 +45,9 @@ const actionTypes = {
     COPIES_COLUMN_ADD:'copies/columnAdd',
     COPIES_COLUMN_REMOVE:'copies/columnRemove',
     COPIES_COLUMNS_SET:'copies/columnSet',
+    COPIES_ROW_ADD:'copies/rowAdd',
+    COPIES_ROW_REMOVE:'copies/rowRemove',
+    COPIES_ROW_SET:'copies/rowSet',
 }
 
 export default actionTypes;

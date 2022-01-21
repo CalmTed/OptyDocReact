@@ -9,7 +9,7 @@ const getinitialState = () => {
             dateEdited:'0',
             creator:'man',
             pageSize:'A4',
-            pageSizeOptions:[['A4','A4'],['A3','A3']],
+            pageSizeOptions:[['A5','A5'],['A4','A4'],['A3','A3']],
             pageOrientation:'portrait',
             pageOrientationOptions:[['Portrait','portrait'],['Landscape','landscape']],
             marginLeft:'0mm',
@@ -19,7 +19,8 @@ const getinitialState = () => {
             zoom:100,
             fitsW:0,
             fitsH:0,
-            children:[]
+            children:[],
+            variableTitle:''
         }  
       }else{
         console.debug('Getting app data from localstorage')
@@ -54,24 +55,26 @@ const templateReducer = (state = getinitialState(), action)=>{
                         localID:_localId,
                         parentID:_parentID,//selected block
                         humanfriendlyID:_HFId,
-                        valueType:'custom',
+                        valueType:'fixed',
                         valueTypeOptions:[
-                            ['Custom','custom'],
+                            ['Fixed','fixed'],
                             ['Variable','variable'],
                             ['Selector','selector'],
                             ['Copy from','copied']
                         ],
                         innerText:'b'+_localId,
+                        variableTitle:'',   
                         copyChannel:_HFId,
                         // isEditing:false,
                         // isTextediting:false,
                         style:{
-                            displayMode:'flex',
+                            // displayMode:'flex',
                             width:'auto', 
                             height:'auto',
                             display:'flex',
                             alignVertical:'inherit',
                             alignVerticalOptions:[
+                                ['Inherit','inherit'],
                                 ['Top','start'],
                                 ['Center','center'],
                                 ['Bottom','end'],
@@ -79,17 +82,16 @@ const templateReducer = (state = getinitialState(), action)=>{
                                 ['Space between','space-between'],
                                 ['Space evenly','space-evenly'],
                                 ['Space evenly','space-evenly'],
-                                ['Inherit','inherit']
                             ],
                             alignHorizontal:'inherit',
                             alignHorizontalOptions:[
+                                ['Inherit','inherit'],
                                 ['Left','start'],
                                 ['Center','center'],
                                 ['Right','end'],
                                 ['Space around','space-around'],
                                 ['Space between','space-between'],
                                 ['Space evenly','space-evenly'],
-                                ['Inherit','inherit']
                             ],
                             displayType:'inherit',
                             displayTypeOptions:[
@@ -359,9 +361,14 @@ const templateReducer = (state = getinitialState(), action)=>{
                 return state;
             }
         case actionTypes.BLOCK_VALUE_TYPE_SET:
-            //TODO validate payload
             if(isValidOption('valueType',action.payload)){
                 return {...state,children:getNewChildrenList('valueType')}
+            }else{
+                return state;
+            }
+        case actionTypes.BLOCK_VARIABLE_TITLE_SET:
+            if(action.payload.length<50){
+                return {...state,children:getNewChildrenList('variableTitle')}
             }else{
                 return state;
             }

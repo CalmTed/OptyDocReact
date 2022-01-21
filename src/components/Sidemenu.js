@@ -89,7 +89,8 @@ function Sidemenu(props) {
       const genBlockMI = (_miData)=>{
         //miData: value,type,action
         let _placeholder = _miData.value;
-        ret.push(<Menuitem key={_miData.value} store={props.store} value= {'selectedBlock.'+_miData.value} type={_miData.type} action={_miData.action} placeholder={_placeholder} />)
+        let _options = typeof _miData.options != 'undefined'?_miData.options:[];
+        ret.push(<Menuitem key={_miData.value} store={props.store} value= {'selectedBlock.'+_miData.value} type={_miData.type} action={_miData.action} placeholder={_placeholder} options={_options}/>)
       }
       genBlockMI({value:'width',type:'size',action:actionTypes.BLOCK_WIDTH_SET})
       genBlockMI({value:'height',type:'size',action:actionTypes.BLOCK_HEGHT_SET})
@@ -115,12 +116,27 @@ function Sidemenu(props) {
       if(blockSelectedChildrenList.length == 0){
         ret.push(<div className='spacer' key='spacerContent' >Content</div>)
         genBlockMI({value:'valueType',type:'selector',action:actionTypes.BLOCK_VALUE_TYPE_SET})
-        if(blockSelectedObject.valueType !== 'copied'){
-          genBlockMI({value:'innerText',type:'textarea',action:actionTypes.BLOCK_INNER_TEXT_SET})
+        if(blockSelectedObject.valueType !== 'copied'){//if block is not copying from another
+          if(blockSelectedObject.valueType !== 'fixed'){//if value is variable
+
+            genBlockMI({value:'variableTitle',type:'text',action:actionTypes.BLOCK_VARIABLE_TITLE_SET})
+            genBlockMI({value:'innerText',type:'textarea',action:actionTypes.BLOCK_INNER_TEXT_SET})
+          }else{
+            genBlockMI({value:'innerText',type:'textarea',action:actionTypes.BLOCK_INNER_TEXT_SET})
+          }
         }else{
           //TODO check whitch copy channels exists 
+          const _getLinksOptions = ()=>{
+            if(1){
+              //loop though the children and find ones not copying
+              // console.log(stateNow.template.children.filter(ch=>{return ch.valueType != 'copied'}))
+              return stateNow.template.children.filter(ch=>{return ch.valueType != 'copied' || (ch.uuid == blockSelectedObject.uuid)}).map(ch=>{return [ch.copyChannel,ch.copyChannel]})
+            }
+            return [blockSelectedObject.copyChannel,blockSelectedObject.copyChannel];
+          }
+          // console.log(_getLinksOptions())
           //show link if it is
-          genBlockMI({value:'copyChannel',type:'text',action:actionTypes.BLOCK_COPY_CHANNEL_SET})
+          genBlockMI({value:'copyChannel',type:'text',action:actionTypes.BLOCK_COPY_CHANNEL_SET,options:_getLinksOptions()})
         } 
       }
       ret.push(<div className='spacer' key='spacerCustomCSS' >Custom CSS</div>)
@@ -130,15 +146,62 @@ function Sidemenu(props) {
   }
   const getCopyMenuContent = ()=>{
     let ret = [];
-    ret.push(<div className='spacer' key='spacerCopyData' >Data to copy</div>)
-    ret.push(<Menuitem key='selectCSV' store={props.store} value="customAction.uploadCSV" type="file" fileType='csv' primary="true" title="Select CSV" icon="hash"/>)
-    ret.push(<Menuitem key='downloadCSV' store={props.store} value="customAction.downloadCSV" type="button"  title="" icon="download"/>)    
+    if(stateNow.copies.columns.length == 0){
+      ret.push(<div className='spacer' key='spacerCopyInfo' >Create variable block to add copy</div>)
+    }else{
+      ret.push(<div className='spacer' key='spacerCopyData' >Data to copy</div>)
+      ret.push(<Menuitem key='selectCSV' store={props.store} value="customAction.uploadCSV" type="file" fileType='csv' primary="true" title="Select CSV" icon="hash"/>)
+      ret.push(<Menuitem key='downloadCSV' store={props.store} value="customAction.downloadCSV" type="button"  title="" icon="download"/>)    
+      if(stateNow.copies.rows.length == 0){
+        ret.push(<Menuitem key='addCopyRow' store={props.store} value="customAction.addCopyRow" action='' type="button"  title="Add copy" icon="add"/>)    
+      }else{
+        ret.push(<div className='spacer' key='spacerCopyList' >Copy</div>)
+        const _copyOptions = ()=>{
+          let _ret = [['Unselected','']]
+          _ret = _ret.concat(stateNow.copies.rows.map((r,i)=>{
+            return ['Copy '+i,i]
+          }))
+          return _ret;
+        }
+        ret.push(<Menuitem key='copySelector' store={props.store} value="app.copySelected" action={actionTypes.SELECTEDCOPY_SET} type="selector" fileType='csv' primary="true" title="Select CSV" onChange='' options={_copyOptions()}/>)
+        ret.push(<Menuitem key='addCopyRow' store={props.store} value="customAction.addCopyRow"  type="button"  title="" icon="add"/>)   
+        if(stateNow.app.copySelected+'' != ''){
+          ret.push(<Menuitem key='removeCopyRow' store={props.store} value="customAction.removeCopyRow"  type="button"  title="" icon="remove"/>)    
+        }
+        if(stateNow.app.copySelected+'' != '' && stateNow.copies.rows[stateNow.app.copySelected] != undefined){
+          stateNow.copies.columns.forEach((col)=>{
+            const _miType  = ()=>{
+              switch(col.type){
+                case 'variable':
+                  return 'textarea';
+                case 'selector':
+                  return 'selector';
+                default:
+                  return 'text';
+              }
+            }
+            const _getOptions = ()=>{
+              let _ret = col.options.map(o=>{return [o,o]})
+              return _ret;
+            }
+            
+            ret.push(<div className='spacer' key={'spacerInput'+col.target} >{col.title}</div>)
+            ret.push(<Menuitem key={col.target+'Input'} store={props.store} value={'selectedCopy.'+col.target} action={actionTypes.COPIES_ROW_SET} columnSelected={col.target} type={_miType()} options={_getOptions()}/>)
+          });
+        }
+      }
+    }
+
     return ret;
   }
   const getPrintMenuContent = ()=>{
     let ret = [];
-    ret.push(<div className='spacer' key='spacerPrint' >Print options</div>)
-    ret.push(<Menuitem key='print' store={props.store} value="customAction.print" type="button" primary="true" title="Print" icon="print"/>)
+    if(stateNow.copies.rows.length != 0 && stateNow.copies.columns.length != 0){
+      ret.push(<div className='spacer' key='spacerPrint' >Print options</div>)
+      ret.push(<Menuitem key='print' store={props.store} value="customAction.print" type="button" primary="true" title="Print" icon="print"/>)
+    }else{
+      ret.push(<div className='spacer' key='spacerNothingToPrint' >Create copy to print</div>)
+    }
     return ret;
   }
   const getSitemenuContent = ()=>{

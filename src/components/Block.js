@@ -7,62 +7,78 @@ function Block(props) {
     const getBlocks = (_props)=>{
         let ret = [];
         const hisChildern = _props.store.getState().template.children.filter(ch=>{return ch.parentID == _props.blockData.uuid})
+        //no children content
         if(hisChildern.length == 0 ){
-            //entering just text
+            //multiline support
             const formatInnerText = (_innerText)=>{
                 let _ret = []
+                if(typeof _innerText == 'undefined'){
+                    return _ret;
+                }
                 if(_innerText.indexOf('\n')==-1){
                     _ret.push(_innerText);
                 }else{
+                    const _getPostfix = ()=>{
+                        return typeof props.copyIndex != 'undefined'?'_'+props.copyIndex:'_p';
+                    }
                     if(_props.blockData.valueType == 'selector'){
-                        _ret.push(<p key={_props.blockData.uuid} id={_props.blockData.uuid+'_p'}>{_innerText.split('\n')[0]}</p>)
+                        _ret.push(<p key={_props.blockData.uuid} id={_props.blockData.uuid+_getPostfix()}>{_innerText.split('\n')[0]}</p>)
                     }else{
                         _innerText.split('\n').forEach((_line,i)=>{
-                            _ret.push(<p key={i} id={_props.blockData.uuid+'_p'}>{_line}</p>)
+                            _ret.push(<p key={i} id={_props.blockData.uuid+_getPostfix()}>{_line}</p>)
                         })
                     }
                 }
                 return _ret;
             }
-            if(_props.blockData.copyChannel == _props.blockData.humanfriendlyID){
-                
-                if(typeof props.copyIndex != 'undefined'){//if it is a copy
-                    let _foundColumn = false;
-                    stateNow.copies.columns.forEach((col,ci)=>{//loop for columns
-                        if(blockData.humanfriendlyID == col.title){//if its a block with same hfid
-                            ret.push(<span key='acopy'>{stateNow.copies.rows[props.copyIndex+1][ci]}</span>)
-                            _foundColumn = true;
+            const _getFromCopyRows = (__stateNow,__uuid,__copyIndex)=>{//aka. column and row
+                //if there is no column or no row we return ''
+                //if there is a value we return string
+                let _ret = ''
+                __stateNow.copies.columns.forEach((col,ci)=>{
+                    if(__uuid+'' == col.target+''){//looking for right col
+                        if(typeof __stateNow.copies.rows[__copyIndex][ci] != 'undefined'){//looking for right row
+                            _ret = __stateNow.copies.rows[props.copyIndex][ci];
                         }
-                    })
-                    if(!_foundColumn){
-                        ret.push(<span key='acopytext'>{blockData.innerText}</span>);
                     }
-                }else{
-                    
-                    //writing its own text
-                    //TODO check for copylink
-                    ret = [...formatInnerText(_props.blockData.innerText)];
+                })
+                return _ret;
+            }
+            let _ObjectOfOrigin = (__props,__copyChannel)=>{
+                let __originObject = __props.store.getState().template.children.filter(ch=>{
+                    return (ch.valueType != 'copied')&&(ch.copyChannel == __copyChannel)
+                })[0]//if there would be more then one origin object -> select first one
+                return __originObject;
+
+            }
+            //if block is copying from another channel
+            let _isCopyLinked = _props.blockData.valueType == 'copied';
+            //if block is a copy of template
+            let _isCopyIndexed = typeof _props.copyIndex != 'undefined';
+            //                    Edit tab           Copy tab
+            //not copiLinked    1.innerText        2.getFromCopyRows
+            //copyLinked        3.textFromOrigin   4.getOrigin > getFromCopyRows
+            if(_isCopyLinked){
+                let _orObj = _ObjectOfOrigin(_props,_props.blockData.copyChannel);
+                if(_isCopyIndexed){//4
+                    ret = [...formatInnerText(_getFromCopyRows(_props.store.getState(),_orObj.uuid,_props.copyIndex))]
+                }else{//3
+                    ret = [...formatInnerText(_orObj.innerText)] 
                 }
             }else{
-                //get inner text from different block
-                const blockToCopyFrom = ()=>{
-                    let __ret = _props.store.getState().template.children.filter(ch=>{return ch.humanfriendlyID == _props.blockData.copyChannel});
-                    if(__ret.length){
-                        return __ret[0];
-                    }else{
-                        return _props.blockData;
-                    }
+                if(_isCopyIndexed){
+                    //2
+                    ret = [...formatInnerText(_getFromCopyRows(_props.store.getState(),_props.blockData.uuid,_props.copyIndex))]
+                }else{
+                    //1
+                    ret = [...formatInnerText(_props.blockData.innerText)]
                 }
-                ret = [...formatInnerText(blockToCopyFrom().innerText)];
             }
-            
         }else{
             //if there`re some children, show them
-            
-        
-        hisChildern.forEach(childBlock => {
+            hisChildern.forEach(childBlock => {
                 if(typeof props.copyIndex != 'undefined'){
-                    ret.push(<Block key={`${blockData.uuid}_${props.copyIndex}`} blockData={childBlock} store={_props.store} copyIndex={props.copyIndex}/>)
+                    ret.push(<Block key={`${childBlock.uuid}_${props.copyIndex}`} blockData={childBlock} store={_props.store} copyIndex={props.copyIndex}/>)
                 }else{
                     ret.push(<Block key={childBlock.uuid} blockData={childBlock} store={_props.store}/>)
                 }
@@ -73,7 +89,12 @@ function Block(props) {
     const getStyle = ()=>{
         //TO DO what if the block is too small to select
         let blockOutline = ''
-        if(blockData.uuid == stateNow.app.blockSelected){
+        //showing selected block
+        if(blockData.uuid == stateNow.app.blockSelected && stateNow.app.tabSelected == 'edit'){
+            blockOutline = 'var(--selected-border)'
+        }
+        //showing selected copy
+        if(blockData.parentID == '' && props.copyIndex+'' == stateNow.app.copySelected && stateNow.app.tabSelected == 'copy'){
             blockOutline = 'var(--selected-border)'
         }
         const checkForZoom = (_val)=>{
@@ -100,8 +121,7 @@ function Block(props) {
             '--block-marginLeft':checkForZoom(blockStyle.marginLeft),
             '--block-marginRight':checkForZoom(blockStyle.marginRight),
         }}
-        const stylesToCheck = {
-            
+        const stylesToCheck = {     
             '--block-fontFamily':blockStyle.fontFamily,
             '--block-fontSize':checkForZoom(blockStyle.fontSize),
             '--block-fontColor':blockStyle.fontColor,
@@ -113,7 +133,7 @@ function Block(props) {
             '--block-align':blockStyle.alignVertical,
             '--block-justify':blockStyle.alignHorizontal
         }
-        Object.entries(stylesToCheck).forEach(s=>{        
+        Object.entries(stylesToCheck).forEach(s=>{      
             //no need to call all if there is inherit or indeclared
             if(['inherit','calc( auto * var(--zoom) )','calc( 0mm * var(--zoom) )'].indexOf(s[1]) == -1){
                 constructedStyle = {...constructedStyle,[s[0]]:[s[1]]}
@@ -123,7 +143,7 @@ function Block(props) {
         blockStyle.customStyle.split('\n').forEach(s=>{
             const _s = s.split(':')      
             if(/^(\w|-){2,20}$/.test(_s[0]) && !/[\[\]{};:]|\d/.test(_s[0]) && !/[\[\]{};:]/.test(_s[1])){
-                //convering to camelCase
+                //convering style-case to camelCase
                 if(_s[0].indexOf('-') >-1){
                     _s[0] = _s[0].split('-').map((part,i)=>{return i>0? part.charAt(0).toUpperCase()+part.slice(1) : part }).join('')
                 }
@@ -136,11 +156,13 @@ function Block(props) {
     const handleClick = (e)=>{
         //selectBlock
         //TO DO if it is not a parent
-        if(blockData.uuid == e.target.id){
-            const clickedBlockId = e.target.id;
+        if((blockData.uuid == e.target.id || blockData.uuid+'_p' == e.target.id) && stateNow.app.tabSelected == 'edit'){
+            const clickedBlockId = e.target.id.replace('_p','');
             const clickedBlock = stateNow.template.children.filter(ch=>{return ch.uuid == clickedBlockId})[0]
             // const selectedBlock = stateNow.template.children.filter(ch=>{return ch.uuid == stateNow.app.blockSelected})[0]
             props.store.dispatch({type:actionTypes.SELECTEDBLOCK_SET,payload:clickedBlock.uuid})
+        }else if(blockData.uuid+'_'+props.copyIndex == e.target.id && stateNow.app.tabSelected == 'copy'){
+            props.store.dispatch({type:actionTypes.SELECTEDCOPY_SET,payload:props.copyIndex})            
         }
     }
     const handleKeyPress = (e)=>{
