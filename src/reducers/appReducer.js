@@ -1,14 +1,15 @@
 import actionTypes from './actionTypes';
+import langWords from '../langWords';
 const getinitialState = () => {
-    if(window.localStorage.getItem('ODStore') == undefined){
+    if(!window.localStorage.getItem('ODStore')){//TO DO for translation development
         return  {
             name:'OptyDoc',
             version:'0.0.1',
             colorMode:'light',
             colorModeOptions:[['Light','light'],['Dark','dark']],
             languageCode:'en',
-            languageWords:{},
-            tabSelected:'',
+            languageWords:langWords(),
+            tabSelected:'edit',
             tabSelectedOptions:[['Edit','edit'],['Copy','copy'],['Print','print']],
             blockSelected:'',
             copySelected:'',
@@ -49,6 +50,23 @@ const appReducer = (state = getinitialState(), action)=>{
             }else{
                 return state;
             }
+        case actionTypes.LANGCODE_TOGGLE:
+            //TO DO get lang code from lang data avalible
+            if(Object.keys(state.languageWords).length > 0 ){
+                //en >> fistKey >> [nextKey] >> en
+                const codeIndexNow = Object.keys(state.languageWords).indexOf(state.languageCode);
+                const langCodesLength = Object.keys(state.languageWords).length;
+                if(langCodesLength>0 && codeIndexNow === -1){
+                    return {...state,languageCode:Object.keys(state.languageWords)[0]}
+                }else if(codeIndexNow < langCodesLength-1){
+                    return {...state,languageCode:Object.keys(state.languageWords)[codeIndexNow+1]}
+                }else{
+                    return {...state,languageCode:'en'}
+                }
+            }else{
+                return state;
+            }
+            break;
         default:
             return state
     }

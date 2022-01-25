@@ -1,6 +1,6 @@
 import React from 'react'
 import actionTypes from '../reducers/actionTypes';
-
+import t from '../local.ts'
 function Tab(props) {
     const state = props.store.getState();
 
@@ -19,7 +19,7 @@ function Tab(props) {
     }
     return (
     <div className={getClasses()} onClick={handleClick} onKeyPress={handleKeyPress} tabIndex={props.tabIndex}>
-        <span>{props.tabName}</span>
+        <span>{t(props.tabName)}</span>
     </div>
     );
 }

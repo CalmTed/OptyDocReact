@@ -4,7 +4,10 @@ const actionTypes = {
     TAB_SET:'menu/tabSet',
     SELECTEDBLOCK_SET:'stack/selectedBlockSet',
     SELECTEDCOPY_SET:'stack/selectedCopySet',
+    LANGCODE_TOGGLE:'language/languageCodeToggle',
 
+    TEMPLATE_OPEN_TEMPLATE:'template/openTemplate',
+    TEMPLATE_NEW_TEMPLATE: 'template/newTemplate',
     TEMPLATE_NEW_BLOCK_ADD:'template/newBlockAdd',
     TEMPLATE_BLOCK_REMOVE:'template/blockRemove',
     ZOOM_SET:'template/zoomSet',

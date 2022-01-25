@@ -276,6 +276,13 @@ border: 1px solid transparent;
             font-weight: 600;
             text-transform:capitalize;
         } 
+        label{
+            height: 100%;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
     }
 }
 .Stack{
@@ -290,7 +297,7 @@ border: 1px solid transparent;
     flex-wrap: wrap;
     //TODO somehow center pages list but on big scale align left
     //TODO align last line of pages to the left
-    justify-content: flex-start;
+    justify-content: flex-start;//not space-evenely because on big zoom works badly
     align-content: flex-start;
     color: var(--text-color);
     &:focus{
@@ -327,9 +334,8 @@ border: 1px solid transparent;
         flex-wrap: wrap;
         align-content: flex-start;
         justify-content: flex-start;
-        .Block{   
-                 
-            transition: all $transitionTime;
+        .Block{
+            transition: none;
             --block-border:1px dashed transparent;
             --selected-border:1px dashed var(--main-color);
             // VARIABLES

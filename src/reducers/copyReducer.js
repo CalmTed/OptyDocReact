@@ -1,6 +1,6 @@
 import actionTypes from "./actionTypes";
 const getinitialState = () => {
-    if(window.localStorage.getItem('ODStore') == undefined){
+    if(!window.localStorage.getItem('ODStore')){
         return  {
             //data for copy values: name, title, type, options
             columns:[],
@@ -18,14 +18,14 @@ const copyReducer = (state = getinitialState(), action)=>{
             //TODO check length of each cell
             let _ret = state;
             let _payload = action.payload;
-            const compareArr = (a,b)=>{
+            const compareArr = (a=[],b)=>{
                 let _ret = true;
                 if(a.length != b.length){
                     return false;
                 }
                 a.forEach((av,ai)=>{
                     b.forEach((bv,bi)=>{
-                        if(ai==bi && av!=bv){
+                        if(ai===bi && av!==bv){
                             _ret = false;
                         }
                     })
@@ -42,6 +42,8 @@ const copyReducer = (state = getinitialState(), action)=>{
                 if(_valid){
                     _ret = {...state,rows:_payload.slice(1)}   
                 }
+            }else if(_payload.length == 0){
+                _ret = {...state,rows:[]}
             }
             return _ret;
         case actionTypes.COPIES_COLUMN_ADD:
@@ -89,7 +91,7 @@ const copyReducer = (state = getinitialState(), action)=>{
             if(typeof action.payload != 'undefined' && typeof action.copySelected != 'undefined' && typeof action.columnSelected != 'undefined'){
                 let _selectedColumnID = 0;
                 state.columns.forEach((c,i)=>{
-                    if(c.target == action.columnSelected){
+                    if(c.target === action.columnSelected){
                         _selectedColumnID = i;
                     }
                 })

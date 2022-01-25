@@ -10,6 +10,23 @@ function Topmenu(props) {
     }
     return ret;
   }
+  const getTemplateTools = ()=>{
+    let ret = [];
+    const isExportDisabled = ()=>{
+      return props.store.getState().template.dateEdited === '0'?{disabled:true}:{};
+    }
+    ret.push(<Topbutton key='importTemplateButton' name='importTemplate' store={props.store}></Topbutton>)
+    ret.push(<Topbutton key='newTemplateButton' name='newTemplate' store={props.store}></Topbutton>)    
+    ret.push(<Topbutton {...isExportDisabled()} key='exportTemplateButton' name='exportTemplate' store={props.store}></Topbutton>)
+    return ret;
+  }
+  const getLangButton = ()=>{
+    if(Object.keys(props.store.getState().app.languageWords).length > 0){
+      return <Topbutton name='language' store={props.store}></Topbutton>
+    }else{
+      return <Topbutton disabled name='language' store={props.store}></Topbutton>
+    }
+  }
   return (
     <div className='Topmenu'>
         <div className='templateTools'>
@@ -21,10 +38,8 @@ function Topmenu(props) {
           <Topbutton disabled name='ellipse' store={props.store}></Topbutton>
         </div>
         <div className='appTools'>
-          <Topbutton disabled name='importTemplate' store={props.store}></Topbutton>
-          <Topbutton name='newTemplate' store={props.store}></Topbutton>
-          <Topbutton disabled name='exportTemplate' store={props.store}></Topbutton>
-          <Topbutton disabled name='language' store={props.store}></Topbutton>
+          {getTemplateTools()}
+          {getLangButton()}
           <Topbutton name='settings' store={props.store}></Topbutton>
         </div>
     </div>

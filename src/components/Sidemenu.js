@@ -2,6 +2,7 @@ import React from 'react'
 import Tab from './Tab';
 import Menuitem from './Menuitem';
 import actionTypes from '../reducers/actionTypes';
+import t from '../local.ts';
 
 function Sidemenu(props) {
   const stateNow = props.store.getState();
@@ -16,13 +17,13 @@ function Sidemenu(props) {
       return <span id={_uuid+'_link'} className='blockLink' key={_uuid} onClick={selectBlock}>{_title}</span>
     }
 
-    if(stateNow.app.blockSelected == ''){
+    if(stateNow.app.blockSelected === '' ||stateNow.template.children.length === 0){
       //TEMPLATE SETINGS
-      ret.push(<div className='spacer' key='spacerTemplate' >Template</div>);
+      ret.push(<div className='spacer' key='spacerTemplate' >{t('Template')}</div>);
       ret.push(<Menuitem key='name' store={props.store} value="template.name" action={actionTypes.TEMPLATE_NAME_SET} type="text" placeholder="Template name" />)
       ret.push(<Menuitem key='pageSize' store={props.store} value="template.pageSize" action={actionTypes.TEMPLATE_PAGE_SIZE_SET} type="selector" />)
       ret.push(<Menuitem key='pageOrientation' store={props.store} value="template.pageOrientation" action={actionTypes.TEMPLATE_PAGE_ORIENATION_SET} type="selector" />)
-      ret.push(<div className='spacer' key='spacerMargin' >Margin</div>)
+      ret.push(<div className='spacer' key='spacerMargin' >{t('Margin')}</div>)
       ret.push(<Menuitem key='marginTop' store={props.store} value="template.marginTop" action={actionTypes.TEMPLATE_MARGIN_TOP_SET} type="size" placeholder="M top" />)
       ret.push(<Menuitem key='marginBottom' store={props.store} value="template.marginBottom" action={actionTypes.TEMPLATE_MARGIN_BOTTOM_SET} type="size" placeholder="M bottom" />)
       ret.push(<Menuitem key='marginLeft' store={props.store} value="template.marginLeft" action={actionTypes.TEMPLATE_MARGIN_LEFT_SET} type="size" placeholder="M left" />)
@@ -30,12 +31,12 @@ function Sidemenu(props) {
       
       var blockSelectedChildrenList = [];
       stateNow.template.children.forEach(ch => {
-        if(ch.parentID == ''){
+        if(ch.parentID === ''){
           blockSelectedChildrenList.push(ch)
         }
       });
       if(blockSelectedChildrenList.length){
-        ret.push(<div className='blockNavigator' key='children'><div className='blockChildren'>Children: {blockSelectedChildrenList.map(chi=>{
+        ret.push(<div className='blockNavigator' key='children'><div className='blockChildren'>{t('Children: ')}{blockSelectedChildrenList.map(chi=>{
           let _ret = [];
           _ret.push(createBlockLink(chi.uuid,chi.humanfriendlyID));
           return _ret;
@@ -43,38 +44,38 @@ function Sidemenu(props) {
       }
     }else{
       //SELECTED BLOCK SETTINGS
-      const blockSelectedObject = stateNow.template.children.filter(ch=>{return ch.uuid == stateNow.app.blockSelected})[0]
+      const blockSelectedObject = stateNow.template.children.filter(ch=>{return ch.uuid+'' === stateNow.app.blockSelected+''})[0]
       var blockSelectedChildrenList = [];
       var blockSelectedNeigborList = [];
       var blockSelectedParentObject = '';
       stateNow.template.children.forEach(ch => {
-        if(ch.parentID == blockSelectedObject.uuid){//get all children
+        if(ch.parentID === blockSelectedObject.uuid){//get all children
           blockSelectedChildrenList.push(ch)
         }
-        if(ch.parentID == blockSelectedObject.parentID && ch.uuid !== blockSelectedObject.uuid){//get all with the same parent
+        if(ch.parentID === blockSelectedObject.parentID && ch.uuid !== blockSelectedObject.uuid){//get all with the same parent
           blockSelectedNeigborList.push(ch);
         }
-        if(ch.uuid == blockSelectedObject.parentID){//get all neigbors
+        if(ch.uuid === blockSelectedObject.parentID){//get all neigbors
           blockSelectedParentObject = ch;
         }
       });
       
       const getNavLinks = (blockSelectedObject,blockSelectedParentObject,blockSelectedNeigborList,blockSelectedChildrenList)=>{    
         let _ret = [];
-        _ret.push(<div key='name' className='blockName'>Block: {blockSelectedObject.humanfriendlyID}</div>)
+        _ret.push(<div key='name' className='blockName'>{t('Block: ')}{blockSelectedObject.humanfriendlyID}</div>)
     
         if(blockSelectedParentObject !== ''){
-          _ret.push(<div key='parent' className='blockParent'>Parent: {createBlockLink(blockSelectedParentObject.uuid,blockSelectedParentObject.humanfriendlyID)}</div>)
+          _ret.push(<div key='parent' className='blockParent'>{t('Parent: ')}{createBlockLink(blockSelectedParentObject.uuid,blockSelectedParentObject.humanfriendlyID)}</div>)
         }
         if(blockSelectedNeigborList.length){
-          _ret.push(<div key='neigbor' className='blockNeigbor'>Neigbors: {blockSelectedNeigborList.map(nei=>{
+          _ret.push(<div key='neigbor' className='blockNeigbor'>{t('Neigbors: ')}{blockSelectedNeigborList.map(nei=>{
             let _ret = [];
             _ret.push(createBlockLink(nei.uuid,nei.humanfriendlyID));
             return _ret;
           })}</div>)
         }
         if(blockSelectedChildrenList.length){
-          _ret.push(<div key='children' className='blockChildren'>Children: {blockSelectedChildrenList.map(chi=>{
+          _ret.push(<div key='children' className='blockChildren'>{t('Children: ')}{blockSelectedChildrenList.map(chi=>{
             let _ret = [];
             _ret.push(createBlockLink(chi.uuid,chi.humanfriendlyID));
             return _ret;
@@ -83,13 +84,12 @@ function Sidemenu(props) {
         return _ret;
       }
       ret.push(<div key='nav' className="blockNavigator" >{
-        
         getNavLinks(blockSelectedObject,blockSelectedParentObject,blockSelectedNeigborList,blockSelectedChildrenList)
       }</div>)
       const genBlockMI = (_miData)=>{
         //miData: value,type,action
         let _placeholder = _miData.value;
-        let _options = typeof _miData.options != 'undefined'?_miData.options:[];
+        let _options = typeof _miData.options !== 'undefined'?_miData.options:[];
         ret.push(<Menuitem key={_miData.value} store={props.store} value= {'selectedBlock.'+_miData.value} type={_miData.type} action={_miData.action} placeholder={_placeholder} options={_options}/>)
       }
       genBlockMI({value:'width',type:'size',action:actionTypes.BLOCK_WIDTH_SET})
@@ -97,24 +97,24 @@ function Sidemenu(props) {
       genBlockMI({value:'displayType',type:'selector',action:actionTypes.BLOCK_DISPLAY_TYPE_SET})
       genBlockMI({value:'backgroundColor',type:'color',action:actionTypes.BLOCK_BACKGROUND_COLOR_SET})
       if(blockSelectedObject.style.displayType !== 'inline'){
-        ret.push(<div className='spacer' key='spacerAlign' >Align</div>)
+        ret.push(<div className='spacer' key='spacerAlign' >{t('Align')}</div>)
         genBlockMI({value:'alignVertical',type:'selector',action:actionTypes.BLOCK_ALIGN_VERTICAL_SET})
         genBlockMI({value:'alignHorizontal',type:'selector',action:actionTypes.BLOCK_ALIGN_HORIZONTAL_SET})
-        ret.push(<div className='spacer' key='spacerMargin' >Margin</div>)
+        ret.push(<div className='spacer' key='spacerMargin' >{t('Margin')}</div>)
         genBlockMI({value:'marginTop',type:'size',action:actionTypes.BLOCK_MARGIN_TOP_SET})
         genBlockMI({value:'marginBottom',type:'size',action:actionTypes.BLOCK_MARGIN_BOTTOM_SET})
         genBlockMI({value:'marginLeft',type:'size',action:actionTypes.BLOCK_MARGIN_LEFT_SET})
         genBlockMI({value:'marginRight',type:'size',action:actionTypes.BLOCK_MARGIN_RIGHT_SET})
       }
-      ret.push(<div className='spacer' key='spacerText' >Text</div>)
+      ret.push(<div className='spacer' key='spacerText' >{t('Text')}</div>)
       genBlockMI({value:'fontFamily',type:'selector',action:actionTypes.BLOCK_FONT_FAMILY_SET})
       genBlockMI({value:'fontSize',type:'size',action:actionTypes.BLOCK_FONT_SIZE_SET})
       genBlockMI({value:'fontColor',type:'color',action:actionTypes.BLOCK_FONT_COLOR_SET})
       genBlockMI({value:'fontBold',type:'selector',action:actionTypes.BLOCK_FONT_BOLD_SET})
       genBlockMI({value:'fontItalic',type:'selector',action:actionTypes.BLOCK_FONT_ITALIC_SET})
       
-      if(blockSelectedChildrenList.length == 0){
-        ret.push(<div className='spacer' key='spacerContent' >Content</div>)
+      if(blockSelectedChildrenList.length === 0){
+        ret.push(<div className='spacer' key='spacerContent' >{t('Content')}</div>)
         genBlockMI({value:'valueType',type:'selector',action:actionTypes.BLOCK_VALUE_TYPE_SET})
         if(blockSelectedObject.valueType !== 'copied'){//if block is not copying from another
           if(blockSelectedObject.valueType !== 'fixed'){//if value is variable
@@ -125,55 +125,50 @@ function Sidemenu(props) {
             genBlockMI({value:'innerText',type:'textarea',action:actionTypes.BLOCK_INNER_TEXT_SET})
           }
         }else{
-          //TODO check whitch copy channels exists 
+          //TODO check which copy channels exists 
           const _getLinksOptions = ()=>{
-            if(1){
-              //loop though the children and find ones not copying
-              // console.log(stateNow.template.children.filter(ch=>{return ch.valueType != 'copied'}))
-              return stateNow.template.children.filter(ch=>{return ch.valueType != 'copied' || (ch.uuid == blockSelectedObject.uuid)}).map(ch=>{return [ch.copyChannel,ch.copyChannel]})
-            }
-            return [blockSelectedObject.copyChannel,blockSelectedObject.copyChannel];
+            //loop though the children and find ones not copying
+            return stateNow.template.children.filter(ch=>{return ch.valueType !== 'copied' || (ch.uuid === blockSelectedObject.uuid)}).map(ch=>{return [ch.copyChannel,ch.copyChannel]})
           }
-          // console.log(_getLinksOptions())
           //show link if it is
           genBlockMI({value:'copyChannel',type:'text',action:actionTypes.BLOCK_COPY_CHANNEL_SET,options:_getLinksOptions()})
         } 
       }
-      ret.push(<div className='spacer' key='spacerCustomCSS' >Custom CSS</div>)
+      ret.push(<div className='spacer' key='spacerCustomCSS' >{t('Custom CSS')}</div>)
       genBlockMI({value:'customStyle',type:'textarea',action:actionTypes.BLOCK_CUSTOM_STYLE_SET})
     }
     return ret;
   }
   const getCopyMenuContent = ()=>{
     let ret = [];
-    if(stateNow.copies.columns.length == 0){
-      ret.push(<div className='spacer' key='spacerCopyInfo' >Create variable block to add copy</div>)
+    if(stateNow.copies.columns.length === 0){
+      ret.push(<div className='spacer' key='spacerCopyInfo' >{t('Create variable block to add copy')}</div>)
     }else{
-      ret.push(<div className='spacer' key='spacerCopyData' >Data to copy</div>)
-      ret.push(<Menuitem key='selectCSV' store={props.store} value="customAction.uploadCSV" type="file" fileType='csv' primary="true" title="Select CSV" icon="hash"/>)
+      ret.push(<div className='spacer' key='spacerCopyData' >{t('Data to copy')}</div>)
+      ret.push(<Menuitem key='selectCSV' store={props.store} value="customAction.uploadCSV" type="file" fileType='csv' primary="true" title={t('Select CSV')} icon="hash"/>)
       ret.push(<Menuitem key='downloadCSV' store={props.store} value="customAction.downloadCSV" type="button"  title="" icon="download"/>)    
-      if(stateNow.copies.rows.length == 0){
-        ret.push(<Menuitem key='addCopyRow' store={props.store} value="customAction.addCopyRow" action='' type="button"  title="Add copy" icon="add"/>)    
+      if(stateNow.copies.rows.length === 0){
+        ret.push(<Menuitem key='addCopyRow' store={props.store} value="customAction.addCopyRow" action='' type="button"  title={t('Add copy')} icon="add"/>)    
       }else{
-        ret.push(<div className='spacer' key='spacerCopyList' >Copy</div>)
+        ret.push(<div className='spacer' key='spacerCopyList' >{t('Copy')}</div>)
         const _copyOptions = ()=>{
           let _ret = [['Unselected','']]
           _ret = _ret.concat(stateNow.copies.rows.map((r,i)=>{
-            return ['Copy '+i,i]
+            return [t('Copy')+' '+i,i]
           }))
           return _ret;
         }
-        ret.push(<Menuitem key='copySelector' store={props.store} value="app.copySelected" action={actionTypes.SELECTEDCOPY_SET} type="selector" fileType='csv' primary="true" title="Select CSV" onChange='' options={_copyOptions()}/>)
+        ret.push(<Menuitem key='copySelector' store={props.store} value="app.copySelected" action={actionTypes.SELECTEDCOPY_SET} type="selector" fileType='csv' primary="true" title={t('Select CSV')} options={_copyOptions()}/>)
         ret.push(<Menuitem key='addCopyRow' store={props.store} value="customAction.addCopyRow"  type="button"  title="" icon="add"/>)   
-        if(stateNow.app.copySelected+'' != ''){
+        if(stateNow.app.copySelected+'' !== ''){
           ret.push(<Menuitem key='removeCopyRow' store={props.store} value="customAction.removeCopyRow"  type="button"  title="" icon="remove"/>)    
         }
-        if(stateNow.app.copySelected+'' != '' && stateNow.copies.rows[stateNow.app.copySelected] != undefined){
+        if(stateNow.app.copySelected+'' !== '' && typeof stateNow.copies.rows[stateNow.app.copySelected] !== 'undefined'){
           stateNow.copies.columns.forEach((col)=>{
             const _miType  = ()=>{
               switch(col.type){
                 case 'variable':
-                  return 'textarea';
+                  return 'text';
                 case 'selector':
                   return 'selector';
                 default:
@@ -196,11 +191,11 @@ function Sidemenu(props) {
   }
   const getPrintMenuContent = ()=>{
     let ret = [];
-    if(stateNow.copies.rows.length != 0 && stateNow.copies.columns.length != 0){
-      ret.push(<div className='spacer' key='spacerPrint' >Print options</div>)
-      ret.push(<Menuitem key='print' store={props.store} value="customAction.print" type="button" primary="true" title="Print" icon="print"/>)
+    if(stateNow.copies.rows.length !== 0 && stateNow.copies.columns.length !== 0){
+      ret.push(<div className='spacer' key='spacerPrint' >{t('Print options')}</div>)
+      ret.push(<Menuitem key='print' store={props.store} value="customAction.print" type="button" primary="true" title={t('Print')} icon="print"/>)
     }else{
-      ret.push(<div className='spacer' key='spacerNothingToPrint' >Create copy to print</div>)
+      ret.push(<div className='spacer' key='spacerNothingToPrint' >{t('Create copy to print')}</div>)
     }
     return ret;
   }
@@ -217,7 +212,7 @@ function Sidemenu(props) {
         ret = [...getPrintMenuContent()]
         break;
       default:
-        ret.push(<div className='spacer' key='spacerNoTabSelected' >No tab selected</div>)
+        ret.push(<div className='spacer' key='spacerNoTabSelected' >{t('No tab selected')}</div>)
         break;
     }
     return ret;

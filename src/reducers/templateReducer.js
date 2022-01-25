@@ -1,11 +1,11 @@
 import actionTypes from "./actionTypes";
-const getinitialState = () => {
+const getinitialState = (newTemp = false) => {
     //SHORTCUT HERE for it to not to store localy
-    if(window.localStorage.getItem('ODStore') == undefined){
+    if(!window.localStorage.getItem('ODStore') || newTemp){
         return  {
             uuid:'000000',
             name:'New template',
-            dateCreated:'0',
+            dateCreated:new Date().getTime(),
             dateEdited:'0',
             creator:'man',
             pageSize:'A4',
@@ -20,10 +20,9 @@ const getinitialState = () => {
             fitsW:0,
             fitsH:0,
             children:[],
-            variableTitle:''
         }  
       }else{
-        console.debug('Getting app data from localstorage')
+        console.debug('Getting app data from localstorage');
         return JSON.parse(window.localStorage.getItem('ODStore')).template;
       } 
 }
@@ -33,7 +32,7 @@ const templateReducer = (state = getinitialState(), action)=>{
         if(['newBlockAdd','blockRemove'].indexOf(property) == -1){
             //just changing children property
             children.map((ch)=>{
-                if(ch.uuid == action.blockSelected){
+                if(ch.uuid+'' === action.blockSelected+''){
                     if(typeof ch[property] != 'undefined'){
                         ch[property] = action.payload;
                     }else{
@@ -96,6 +95,7 @@ const templateReducer = (state = getinitialState(), action)=>{
                             displayType:'inherit',
                             displayTypeOptions:[
                                 ['Inline','inline'],
+                                ['Block','block'],
                                 ['Flex','flex'],
                                 ['Inherit','inherit']
                             ],
@@ -146,7 +146,7 @@ const templateReducer = (state = getinitialState(), action)=>{
                     const getParentList = (_children,_parID,_parList)=>{
                         _parList.push(_parID*1)//need to convert to number
                         _children.forEach((ch)=>{
-                            if(ch.parentID == _parID){
+                            if(ch.parentID === _parID){
                                 _parList = [...getParentList(_children,ch.uuid,_parList)];
                             }
                         });
@@ -179,7 +179,7 @@ const templateReducer = (state = getinitialState(), action)=>{
         if(typeof state[_parameter+'Options'] != 'undefined'){
             return state[_parameter+'Options'].map((o)=>{return o[1]}).indexOf(_payload) > -1;
         }else {
-            let _selectedBlock = state.children.filter(ch=>ch.uuid == action.blockSelected)[0]
+            let _selectedBlock = state.children.filter(ch=>ch.uuid+'' === action.blockSelected+'')[0]
             if(typeof _selectedBlock[_parameter+'Options'] != 'undefined'){
                 return _selectedBlock[_parameter+'Options'].map((o)=>{return o[1]}).indexOf(_payload) > -1;
             }else if(typeof _selectedBlock.style[_parameter+'Options'] != 'undefined'){
@@ -193,12 +193,23 @@ const templateReducer = (state = getinitialState(), action)=>{
     const isValidText = (_value)=>{
         return !/[<>\/{}|]/g.test(_value) && _value.length<500
     }
-    
+    const _return = (newState)=>{
+        newState = {...newState,dateEdited:new Date().getTime()}
+        return newState
+    }
     switch(action.type){
+        case actionTypes.TEMPLATE_OPEN_TEMPLATE:
+            let ret = {...getinitialState()}
+            Object.keys(action.payload).forEach(k=>{
+                ret[k] = action.payload[k];
+            })
+            return _return(ret);
+        case actionTypes.TEMPLATE_NEW_TEMPLATE:
+            return getinitialState(true)
         case actionTypes.TEMPLATE_NEW_BLOCK_ADD:
-            return {...state,children:getNewChildrenList('newBlockAdd')}
+            return _return({...state,children:getNewChildrenList('newBlockAdd')})
         case actionTypes.TEMPLATE_BLOCK_REMOVE:
-            return {...state,children:getNewChildrenList('blockRemove')}
+            return _return({...state,children:getNewChildrenList('blockRemove')})
         case actionTypes.ZOOM_SET:
             //TODO make if functional for scroll
             if(action.payload>=500){
@@ -210,183 +221,183 @@ const templateReducer = (state = getinitialState(), action)=>{
             return {...state,zoom:action.payload}
         case actionTypes.TEMPLATE_NAME_SET:    
             if(isValidText(action.payload) && action.payload.length < 40){
-                return {...state,name:action.payload}
+                return _return({...state,name:action.payload})
             }else{
-                return state;
+                return state
             }
         case actionTypes.TEMPLATE_PAGE_SIZE_SET:
             if(isValidOption('pageSize',action.payload)){
-                return {...state,pageSize:action.payload}
+                return _return({...state,pageSize:action.payload})
             }else{
-                return state;
+                return state            
             }
         case actionTypes.TEMPLATE_PAGE_ORIENATION_SET:
             if(isValidOption('pageOrientation',action.payload)){
-                return {...state,pageOrientation:action.payload}
+                return _return({...state,pageOrientation:action.payload})
             }else{
                 return state;
             }
         case actionTypes.TEMPLATE_MARGIN_TOP_SET:
             if(isValidSize(action.payload)){
-                return {...state,marginTop:action.payload}
+                return _return({...state,marginTop:action.payload})
             }else{
                 return state;
             }
         case actionTypes.TEMPLATE_MARGIN_BOTTOM_SET:
             if(isValidSize(action.payload)){
-                return {...state,marginBottom:action.payload}
+                return _return({...state,marginBottom:action.payload})
             }else{
                 return state;
             }
         case actionTypes.TEMPLATE_MARGIN_LEFT_SET:
             if(isValidSize(action.payload)){
-                return {...state,marginLeft:action.payload}
+                return _return({...state,marginLeft:action.payload})
             }else{
                 return state;
             }
         case actionTypes.TEMPLATE_MARGIN_RIGHT_SET:
             if(isValidSize(action.payload)){
-                return {...state,marginRight:action.payload}
+                return _return({...state,marginRight:action.payload})
             }else{
                 return state;
             }
         //SELECTED BLOCK
         case actionTypes.BLOCK_INNER_TEXT_SET:
             if(isValidText(action.payload)){
-                return {...state,children:getNewChildrenList('innerText')}
+                return _return({...state,children:getNewChildrenList('innerText')})
             }else{
                 return state;
             }
         case actionTypes.BLOCK_WIDTH_SET:
             if(isValidSize(action.payload)){
-                return {...state,children:getNewChildrenList('width')}
+                return _return({...state,children:getNewChildrenList('width')})
             }else{
                 return state;
             };
         case actionTypes.BLOCK_HEGHT_SET:
             if(isValidSize(action.payload)){
-                return {...state,children:getNewChildrenList('height')}
+                return _return({...state,children:getNewChildrenList('height')})
             }else{
                 return state;
             }
         case actionTypes.BLOCK_ALIGN_VERTICAL_SET:
             if(isValidOption('alignVertical',action.payload)){
-                return {...state,children:getNewChildrenList('alignVertical')}
+                return _return({...state,children:getNewChildrenList('alignVertical')})
             }else{
                 return state;
             }
         case actionTypes.BLOCK_ALIGN_HORIZONTAL_SET:
             if(isValidOption('alignHorizontal',action.payload)){
-                return {...state,children:getNewChildrenList('alignHorizontal')}
+                return _return({...state,children:getNewChildrenList('alignHorizontal')})
             }else{
                 return state;
             }
         case actionTypes.BLOCK_DISPLAY_TYPE_SET:
             if(isValidOption('displayType',action.payload)){
-                return {...state,children:getNewChildrenList('displayType')}
+                return _return({...state,children:getNewChildrenList('displayType')})
             }else{
                 return state;
             }
         case actionTypes.BLOCK_MARGIN_TOP_SET:
             if(isValidSize(action.payload)){
-                return {...state,children:getNewChildrenList('marginTop')}
+                return _return({...state,children:getNewChildrenList('marginTop')})
             }else{
                 return state;
             }
         case actionTypes.BLOCK_MARGIN_BOTTOM_SET:
             if(isValidSize(action.payload)){
-                return {...state,children:getNewChildrenList('marginBottom')}
+                return _return({...state,children:getNewChildrenList('marginBottom')})
             }else{
                 return state;
             }
         case actionTypes.BLOCK_MARGIN_LEFT_SET:
             if(isValidSize(action.payload)){
-                return {...state,children:getNewChildrenList('marginLeft')}
+                return _return({...state,children:getNewChildrenList('marginLeft')})
             }else{
                 return state;
             }
         case actionTypes.BLOCK_MARGIN_RIGHT_SET:
             if(isValidSize(action.payload)){
-                return {...state,children:getNewChildrenList('marginRight')}
+                return _return({...state,children:getNewChildrenList('marginRight')})
             }else{
                 return state;
             }
         case actionTypes.BLOCK_FONT_FAMILY_SET:
             if(isValidOption('fontFamily',action.payload)){
-                return {...state,children:getNewChildrenList('fontFamily')}
+                return _return({...state,children:getNewChildrenList('fontFamily')})
             }else{
                 return state;
             }
         case actionTypes.BLOCK_FONT_SIZE_SET:
             //TODO validate payload
             if(isValidSize(action.payload)){
-                return {...state,children:getNewChildrenList('fontSize')}
+                return _return({...state,children:getNewChildrenList('fontSize')})
             }else{
                 return state;
             }
         case actionTypes.BLOCK_FONT_COLOR_SET:
             if(/#[0-9a-f]{6}/.test(action.payload)){
-                return {...state,children:getNewChildrenList('fontColor')}
+                return _return({...state,children:getNewChildrenList('fontColor')})
             }else{
                 return state;
             }
         case actionTypes.BLOCK_BACKGROUND_COLOR_SET:
             if(/#[0-9a-f]{6}/.test(action.payload)){
-                return {...state,children:getNewChildrenList('backgroundColor')}
+                return _return({...state,children:getNewChildrenList('backgroundColor')})
             }else{
                 return state;
             }
         case actionTypes.BLOCK_FONT_BOLD_SET:
             if(isValidOption('fontBold',action.payload)){
-                return {...state,children:getNewChildrenList('fontBold')}
+                return _return({...state,children:getNewChildrenList('fontBold')})
             }else{
                 return state;
             }
         case actionTypes.BLOCK_FONT_ITALIC_SET:
             if(isValidOption('fontItalic',action.payload)){
-                return {...state,children:getNewChildrenList('fontItalic')}
+                return _return({...state,children:getNewChildrenList('fontItalic')})
             }else{
                 return state;
             }
         case actionTypes.BLOCK_FONT_UNDERLINE_SET:
             if(isValidOption('fontUnderline',action.payload)){
-                return {...state,children:getNewChildrenList('fontUnderline')}
+                return _return({...state,children:getNewChildrenList('fontUnderline')})
             }else{
                 return state;
             } 
         case actionTypes.BLOCK_COPY_CHANNEL_SET:
             if(isValidText(action.payload) && action.payload.length<10){
-                return {...state,children:getNewChildrenList('copyChannel')}
+                return _return({...state,children:getNewChildrenList('copyChannel')})
             }else{
                 return state;
             }
         case actionTypes.BLOCK_VALUE_TYPE_SET:
             if(isValidOption('valueType',action.payload)){
-                return {...state,children:getNewChildrenList('valueType')}
+                return _return({...state,children:getNewChildrenList('valueType')})
             }else{
                 return state;
             }
         case actionTypes.BLOCK_VARIABLE_TITLE_SET:
             if(action.payload.length<50){
-                return {...state,children:getNewChildrenList('variableTitle')}
+                return _return({...state,children:getNewChildrenList('variableTitle')})
             }else{
                 return state;
             }
         case actionTypes.BLOCK_CUSTOM_STYLE_SET:
             if(!/[{}*\/\\<>^?@&$~`|]/g.test(action.payload) && action.payload.length<500){
-                return {...state,children:getNewChildrenList('customStyle')}
+                return _return({...state,children:getNewChildrenList('customStyle')})
             }else{
                 return state;
             }
         case actionTypes.TEMPLATE_FITS_H_SET:
             if(/^[\d]{1,10}$/.test(action.payload)){
-                return {...state,fitsH:action.payload}
+                return _return({...state,fitsH:action.payload})
             }else{
                 return state;
             }
         case actionTypes.TEMPLATE_FITS_W_SET:
             if(/^[\d]{1,10}$/.test(action.payload)){
-                return {...state,fitsW:action.payload}
+                return _return({...state,fitsW:action.payload})
             }else{
                 return state;
             }

@@ -1,6 +1,7 @@
 import React from 'react';
 import Icon from './Icon';
 import actionTypes from '../reducers/actionTypes';
+import t from '../local.ts';
 
 function Menuitem(props) {
     const stateNow = props.store.getState();
@@ -33,7 +34,7 @@ function Menuitem(props) {
         }
         a.forEach((av,ai)=>{
             b.forEach((bv,bi)=>{
-                if(ai==bi && av!=bv){
+                if(ai===bi && av!==bv){
                     _ret = false;
                 }
             })
@@ -43,7 +44,7 @@ function Menuitem(props) {
     const uploadFile = (_e,_fileType,_actionType)=>{
         let _file = _e.target.files[0];
         let _fileText = '';
-        if(_file.name.substr(-(_fileType.length),_fileType.length) == _fileType){
+        if(_file.name.substr(-(_fileType.length),_fileType.length) === _fileType){
             //geting text value of csv file
             let fr = new FileReader();
             fr.onload = function(){
@@ -133,7 +134,7 @@ function Menuitem(props) {
                             if(col.type == 'selector'){
                                 return col.options[0];
                             }else if (col.type == 'variable'){
-                                return stateNow.template.children.filter(ch=>{return ch.uuid == col.target})[0].innerText;
+                                return stateNow.template.children.filter(ch=>{return ch.uuid+'' === col.target})[0].innerText;
                             }else{
                                 return col.title;
                             }
@@ -158,8 +159,8 @@ function Menuitem(props) {
                     props.store.dispatch({type:props.action,payload:e.target.value,copySelected:stateNow.app.copySelected,columnSelected:props.columnSelected})
                 }
                 //changing selectedBlock
-                if(stateNow.app.blockSelected != ''){
-                    let selectedBlockObject = stateNow.template.children.filter((b)=>{return b.uuid == stateNow.app.blockSelected})[0]
+                if(stateNow.app.blockSelected !== ''){
+                    let selectedBlockObject = stateNow.template.children.filter((b)=>{return b.uuid === stateNow.app.blockSelected})[0]
                     //editing copies columns table
                     if(
                         ((props.action == actionTypes.BLOCK_INNER_TEXT_SET)||(props.action == actionTypes.BLOCK_VALUE_TYPE_SET)||(props.action == actionTypes.BLOCK_VARIABLE_TITLE_SET))
@@ -200,7 +201,7 @@ function Menuitem(props) {
                     setTimeout(()=>{
                         let farthestHeight = 0;
                         let farthestWidth = 0;
-                        stateNow.template.children.filter(ch=>{return ch.parentID == ''}).forEach(rootChild=>{
+                        stateNow.template.children.filter(ch=>{return ch.parentID === ''}).forEach(rootChild=>{
                             let childDomObj = document.getElementById(rootChild.uuid)
                             // console.log(childDomObj,childDomObj.clientWidth,childDomObj.offsetLeft,childDomObj.clientWidth+childDomObj.offsetLeft)
                             // console.log(childDomObj,childDomObj.clientHeight,childDomObj.offsetTop,childDomObj.clientHeight+childDomObj.offsetTop)
@@ -222,10 +223,10 @@ function Menuitem(props) {
                         // console.log('diff',pageInnerWidth/blockOuterWidth,pageInnerHeight/blockOuterHeight)
                         let fitW = Math.floor(pageInnerWidth / blockOuterWidth);
                         let fitH = Math.floor(pageInnerHeight / blockOuterHeight);
-                        if(fitW ==0 && Math.abs(pageInnerWidth - blockOuterWidth) < 5){//some error is ok for flex
+                        if(fitW ===0 && Math.abs(pageInnerWidth - blockOuterWidth) < 5){//some error is ok for flex
                             fitW = 1;
                         }
-                        if(fitH ==0 && Math.abs(pageInnerHeight - blockOuterHeight) < 5){//some error is ok for flex
+                        if(fitH ===0 && Math.abs(pageInnerHeight - blockOuterHeight) < 5){//some error is ok for flex
                             fitH = 1;
                         }
                         // console.log(fitH,fitW)
@@ -261,8 +262,7 @@ function Menuitem(props) {
                         _selectedColumnID = i;
                     }
                 })
-                //TODO if copyIndex if undefined
-                if(stateNow.copies.rows[stateNow.app.copySelected]!= undefined){
+                if(typeof stateNow.copies.rows[stateNow.app.copySelected] != 'undefined' && stateNow.copies.rows[stateNow.app.copySelected][_selectedColumnID] != null){
                     ret = stateNow.copies.rows[stateNow.app.copySelected][_selectedColumnID]
                 }
             }
@@ -273,20 +273,21 @@ function Menuitem(props) {
         }
         switch(props.type){
             case 'text':
-                ret.push(<input key={valueMI[1]+'TextInput'} value={inputValue()} onChange={handleMIchange} placeholder={props.placeholder} title={valueMI[1]}/>);
+                ret.push(<input key={valueMI[1]+'TextInput'} value={inputValue()} onChange={handleMIchange} placeholder={props.placeholder} title={t(valueMI[1])}/>);
                 // ret.push(<textarea key={target[1]} className='text' onChange={handleMIchange} placeholder={props.placeholder} title={target[1]}>{inputValue()}</textarea>);
                 break;
             case 'textarea':
-                ret.push(<textarea key={valueMI[1]+'TextareaInput'} className='textarea' value={inputValue()} onChange={handleMIchange} placeholder={props.placeholder} title={valueMI[1]}></textarea>);
+                ret.push(<textarea key={valueMI[1]+'TextareaInput'} className='textarea' value={inputValue()} onChange={handleMIchange} placeholder={props.placeholder} title={t(valueMI[1])}></textarea>);
                 // ret.push(<input key={target[1]} value={inputValue()} onChange={handleMIchange} placeholder={props.placeholder} title={target[1]}/>);
                 break;
             case 'size':
-                ret.push(<input key={valueMI[1]+'SizeInput'} className='size' value={inputValue()} onChange={handleMIchange} placeholder={props.placeholder}  title={valueMI[1]}/>);
+                ret.push(<input key={valueMI[1]+'SizeInput'} className='size' value={inputValue()} onChange={handleMIchange} placeholder={props.placeholder}  title={t(valueMI[1])}/>);
                 break;
             case 'color':
-                ret.push(<input key={valueMI[1]+'ColorInput'} className='color' type='color' value={inputValue()} onChange={handleMIchange} placeholder={props.placeholder}  title={valueMI[1]}/>);
+                ret.push(<input key={valueMI[1]+'ColorInput'} className='color' type='color' value={inputValue()} onChange={handleMIchange} placeholder={props.placeholder}  title={t(valueMI[1])}/>);
                 break;
             case 'selector':
+                
                 let _options = [['','']];
                 let miOptionsName = valueMI[1]+'Options';
                 let targetObject = stateNow[valueMI[0]];
@@ -304,7 +305,12 @@ function Menuitem(props) {
                     _options = props.options;
                 }
                 let options = _options.map(([title,optionValue],index)=>{
-                    return <option key={index} value={optionValue}>{title}</option>
+                    //check if we need to translate
+                    if(valueMI[0] == 'selectedCopy'){
+                        return <option key={index} value={optionValue}>{title}</option>
+                    }else{
+                        return <option key={index} value={optionValue}>{t(title)}</option>
+                    }
                 })
                 ret.push(<select key={valueMI[1]+'SelectorInput'} onChange={handleMIchange} value={inputValue()} title={valueMI[1]} >{options}</select>);
                 break;

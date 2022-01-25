@@ -1,6 +1,7 @@
 import actionTypes from '../reducers/actionTypes';
 import React from 'react'
 import Block from './Block';
+import t from '../local.ts';
 function Stack(props) {
     const stateNow = props.store.getState();
     const zoom = stateNow.template.zoom;
@@ -13,7 +14,7 @@ function Stack(props) {
             //for now show nothing
         }else{//if there`re some children
             //show them
-            stateNow.template.children.filter(ch=>{return ch.parentID == ''}).forEach(childBlock => {
+            stateNow.template.children.filter(ch=>{return ch.parentID === ''}).forEach(childBlock => {
                 ret.push(<Block key={childBlock.uuid} blockData={childBlock} store={props.store}/>)
             });
         }
@@ -23,7 +24,7 @@ function Stack(props) {
         let ret = [];
         stateNow.copies.rows.filter((r,i)=>{return true}).forEach((row,ci)=>{
             if(ci>=_startFrom && ci < _startFrom+_perPage){
-                stateNow.template.children.filter(ch=>{return ch.parentID == ''}).forEach(childBlock => {
+                stateNow.template.children.filter(ch=>{return ch.parentID === ''}).forEach(childBlock => {
                     ret.push(<Block key={`${childBlock.uuid}_${ci}`} blockData={childBlock} store={props.store} copyIndex={ci}/>)
                 });
             }
@@ -59,11 +60,11 @@ function Stack(props) {
                         ret.push(<div key='1' className='PageWrapper'><div className='PageInner'>{getCopies()}</div></div>)
                     }
                 }else{
-                        ret.push(<h1 key='placeholder' className='stackPlaceholder'>No copy to show</h1>)
+                        ret.push(<h1 key='placeholder' className='stackPlaceholder'>{t('No copy to show')}</h1>)
                 }
                 break;
             default:
-                ret.push(<h1 key='placeholder'   className='stackPlaceholder'>No tab selected</h1>)
+                ret.push(<h1 key='placeholder'   className='stackPlaceholder'>{t('No tab selected')}</h1>)
                 break;
         }
         
@@ -87,7 +88,7 @@ function Stack(props) {
             'A3':['297mm','419.9mm'],
         }
         let pageWidth = sizes[stateNow.template.pageSize][(stateNow.template.pageOrientation == 'landscape')*1];
-        let pageHeight = sizes[stateNow.template.pageSize][(stateNow.template.pageOrientation !== 'landscape')*1];
+        let pageHeight = sizes[stateNow.template.pageSize][(stateNow.template.pageOrientation != 'landscape')*1];
         const checkForZoom = (_val)=>{
             _val+='';
             if(_val){

@@ -36,9 +36,12 @@ function Block(props) {
                 //if there is a value we return string
                 let _ret = ''
                 __stateNow.copies.columns.forEach((col,ci)=>{
-                    if(__uuid+'' == col.target+''){//looking for right col
-                        if(typeof __stateNow.copies.rows[__copyIndex][ci] != 'undefined'){//looking for right row
+                    if(__uuid+'' === col.target+''){//looking for right col
+                        if(typeof __stateNow.copies.rows[__copyIndex][ci] != 'undefined' && __stateNow.copies.rows[__copyIndex][ci] != null){//looking for right row
                             _ret = __stateNow.copies.rows[props.copyIndex][ci];
+                            
+                        }else{
+                            _ret = __stateNow.template.children.filter(ch=>{ return ch.uuid+'' === __uuid+''})[0].innerText;
                         }
                     }
                 })
@@ -46,7 +49,7 @@ function Block(props) {
             }
             let _ObjectOfOrigin = (__props,__copyChannel)=>{
                 let __originObject = __props.store.getState().template.children.filter(ch=>{
-                    return (ch.valueType != 'copied')&&(ch.copyChannel == __copyChannel)
+                    return (ch.valueType != 'copied')&&(ch.copyChannel+'' === __copyChannel+'')
                 })[0]//if there would be more then one origin object -> select first one
                 return __originObject;
 
@@ -60,15 +63,29 @@ function Block(props) {
             //copyLinked        3.textFromOrigin   4.getOrigin > getFromCopyRows
             if(_isCopyLinked){
                 let _orObj = _ObjectOfOrigin(_props,_props.blockData.copyChannel);
+                //if block copies it self
+                if(typeof _orObj == 'undefined'){
+                    _orObj = _props.blockData;
+                }
                 if(_isCopyIndexed){//4
-                    ret = [...formatInnerText(_getFromCopyRows(_props.store.getState(),_orObj.uuid,_props.copyIndex))]
+                    
+                    if(_orObj.valueType != 'fixed'){
+                        ret = [...formatInnerText(_getFromCopyRows(_props.store.getState(),_orObj.uuid,_props.copyIndex))]
+                    }else{
+                        ret = [...formatInnerText(_orObj.innerText)]
+                    }
                 }else{//3
                     ret = [...formatInnerText(_orObj.innerText)] 
                 }
             }else{
                 if(_isCopyIndexed){
                     //2
-                    ret = [...formatInnerText(_getFromCopyRows(_props.store.getState(),_props.blockData.uuid,_props.copyIndex))]
+                    //TODO is static or variable?
+                    if(_props.blockData.valueType != 'fixed'){
+                        ret = [...formatInnerText(_getFromCopyRows(_props.store.getState(),_props.blockData.uuid,_props.copyIndex))]
+                    }else{
+                        ret = [...formatInnerText(_props.blockData.innerText)]
+                    }
                 }else{
                     //1
                     ret = [...formatInnerText(_props.blockData.innerText)]
@@ -90,11 +107,11 @@ function Block(props) {
         //TO DO what if the block is too small to select
         let blockOutline = ''
         //showing selected block
-        if(blockData.uuid == stateNow.app.blockSelected && stateNow.app.tabSelected == 'edit'){
+        if(blockData.uuid === stateNow.app.blockSelected && stateNow.app.tabSelected == 'edit'){
             blockOutline = 'var(--selected-border)'
         }
         //showing selected copy
-        if(blockData.parentID == '' && props.copyIndex+'' == stateNow.app.copySelected && stateNow.app.tabSelected == 'copy'){
+        if(blockData.parentID === '' && props.copyIndex+'' == stateNow.app.copySelected && stateNow.app.tabSelected == 'copy'){
             blockOutline = 'var(--selected-border)'
         }
         const checkForZoom = (_val)=>{
@@ -161,7 +178,7 @@ function Block(props) {
             const clickedBlock = stateNow.template.children.filter(ch=>{return ch.uuid == clickedBlockId})[0]
             // const selectedBlock = stateNow.template.children.filter(ch=>{return ch.uuid == stateNow.app.blockSelected})[0]
             props.store.dispatch({type:actionTypes.SELECTEDBLOCK_SET,payload:clickedBlock.uuid})
-        }else if(blockData.uuid+'_'+props.copyIndex == e.target.id && stateNow.app.tabSelected == 'copy'){
+        }else if(blockData.uuid+'_'+props.copyIndex === e.target.id && stateNow.app.tabSelected == 'copy'){
             props.store.dispatch({type:actionTypes.SELECTEDCOPY_SET,payload:props.copyIndex})            
         }
     }

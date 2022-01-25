@@ -12,6 +12,6 @@ const rootReducer = combineReducers({
 const store = createStore(rootReducer)
 store.subscribe(() => {
   window.localStorage.setItem('ODStore',JSON.stringify(store.getState()))
-}) 
+})
 
 export default store;
