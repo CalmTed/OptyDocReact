@@ -4,17 +4,17 @@ import actionTypes from '../reducers/actionTypes';
 import t from '../local.ts'
 function Topbutton(props) {
     var disabled = false;
-    if(props.disabled){
-        disabled = true;
-    }
-    switch(props.name){
-        case 'removeBlock':
-            if(! props.store.getState().app.blockSelected !== ''){
-                disabled = true;
-            }
-            break;
-    }
     const isDisabled = ()=>{
+        if(props.disabled){
+            disabled = true;
+        }
+        switch(props.name){
+            case 'removeBlock':
+                if(props.store.getState().app.blockSelected == ''){
+                    disabled = true;
+                }
+                break;
+        }
         if(disabled){
             return 'disabled'
         }else{

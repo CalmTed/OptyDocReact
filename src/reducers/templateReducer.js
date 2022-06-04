@@ -1,6 +1,14 @@
 import actionTypes from "./actionTypes";
+import { templateSizes } from '../constants/constants'
+
 const getinitialState = (newTemp = false) => {
     //SHORTCUT HERE for it to not to store localy
+    let getTemplateSizesOptions = (templateSizes)=>{
+        if(! templateSizes){return undefined}
+        return templateSizes.map(size=>{
+            return [size,size]
+        })
+    }
     if(!window.localStorage.getItem('ODStore') || newTemp){
         return  {
             uuid:'000000',
@@ -8,8 +16,8 @@ const getinitialState = (newTemp = false) => {
             dateCreated:new Date().getTime(),
             dateEdited:'0',
             creator:'man',
-            pageSize:'A4',
-            pageSizeOptions:[['A5','A5'],['A4','A4'],['A3','A3']],
+            pageSize: typeof templateSizes !== 'undefined'? Object.keys(templateSizes)[0] : 'A4',
+            pageSizeOptions: typeof templateSizes !== 'undefined'? getTemplateSizesOptions(Object.keys(templateSizes)) : [['A4','A4']],
             pageOrientation:'portrait',
             pageOrientationOptions:[['Portrait','portrait'],['Landscape','landscape']],
             marginLeft:'0mm',
@@ -64,13 +72,9 @@ const templateReducer = (state = getinitialState(), action)=>{
                         innerText:'b'+_localId,
                         variableTitle:'',   
                         copyChannel:_HFId,
-                        // isEditing:false,
-                        // isTextediting:false,
                         style:{
-                            // displayMode:'flex',
                             width:'auto', 
                             height:'auto',
-                            display:'flex',
                             alignVertical:'inherit',
                             alignVerticalOptions:[
                                 ['Inherit','inherit'],
@@ -136,10 +140,7 @@ const templateReducer = (state = getinitialState(), action)=>{
                                 ['Underline','underline'],
                                 ['Inherit','inherit']
                             ],
-                            
                             customStyle:''
-
-                            
                         }
                     });break;
                 case 'blockRemove':

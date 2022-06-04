@@ -2,6 +2,8 @@ import actionTypes from '../reducers/actionTypes';
 import React from 'react'
 import Block from './Block';
 import t from '../local.ts';
+import { templateSizes, TAB_NAMES } from '../constants/constants'
+
 function Stack(props) {
     const stateNow = props.store.getState();
     const zoom = stateNow.template.zoom;
@@ -45,11 +47,11 @@ function Stack(props) {
         //to swap blocks ??? you give it new order_id
         let ret = [];
         switch(stateNow.app.tabSelected){
-            case 'edit':
+            case TAB_NAMES.edit:
                 ret.push(<div key='1' className='PageWrapper'><div className='PageInner'>{getBlocks()}</div></div>)
                 break;
-            case 'copy':
-            case 'print':
+            case TAB_NAMES.copy:
+            case TAB_NAMES.print:
                 if(stateNow.copies.rows.length != 0 && stateNow.copies.columns.length != 0){
                     //get copies rows length / copies per page
                     if(fitsOnPage>0&&pagesNeeded>1){
@@ -73,20 +75,16 @@ function Stack(props) {
     const handleClick = (e)=>{
         // unselect Block
         if(e.target.classList.contains('Stack')){
-            if(stateNow.app.tabSelected == 'edit'){
+            if(stateNow.app.tabSelected == TAB_NAMES.edit){
                 props.store.dispatch({type:actionTypes.SELECTEDBLOCK_SET,payload:''})
-            }else if(stateNow.app.tabSelected == 'copy'){
+            }else if(stateNow.app.tabSelected == TAB_NAMES.copy ){
                 props.store.dispatch({type:actionTypes.SELECTEDCOPY_SET,payload:''})
             }
         }
         
     }
     const getStyle = ()=>{
-        const sizes = {
-            'A5':['148mm','209.9mm'],
-            'A4':['210mm','297.1mm'],
-            'A3':['297mm','419.9mm'],
-        }
+        const sizes = templateSizes
         let pageWidth = sizes[stateNow.template.pageSize][(stateNow.template.pageOrientation == 'landscape')*1];
         let pageHeight = sizes[stateNow.template.pageSize][(stateNow.template.pageOrientation != 'landscape')*1];
         const checkForZoom = (_val)=>{
@@ -111,7 +109,7 @@ function Stack(props) {
             '--page-margin-right':checkForZoom(stateNow.template.marginRight),
             // '--stack-height':`calc(${pagesNeeded} * ${pageHeight})`
         }
-        if(stateNow.app.tabSelected == 'print'){
+        if(stateNow.app.tabSelected == TAB_NAMES.print ){
             _ret['--stack-height'] = `calc(${pagesNeeded} * ${pageHeight})`;
             _ret['--text-color'] = `rgb(26, 26, 26)`;
             _ret['--menu-backcolor'] = `rgb(254,254,254)`;

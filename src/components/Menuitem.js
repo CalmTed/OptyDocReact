@@ -2,6 +2,7 @@ import React from 'react';
 import Icon from './Icon';
 import actionTypes from '../reducers/actionTypes';
 import t from '../local.ts';
+import { TAB_NAMES, MI_INPUT_TYPES } from '../constants/constants'
 
 function Menuitem(props) {
     const stateNow = props.store.getState();
@@ -9,19 +10,20 @@ function Menuitem(props) {
     const getClasses = ()=>{
         let ret = '';
         switch(props.type){
-            case 'text':
+            case MI_INPUT_TYPES.text:
                 ret +='text'
                 break;
-            case 'textarea':
+            case MI_INPUT_TYPES.textarea:
                 ret +='textarea'
                 break;
-            case 'selector':
+            case MI_INPUT_TYPES.selector:
                 ret +='selector'
                 break;
-            case 'file':
+            case MI_INPUT_TYPES.file:
                 ret +='file'
                 break;
         }
+        // ret += props.type
         return ret;
     }
     const compareArr = (a,b)=>{
@@ -153,9 +155,9 @@ function Menuitem(props) {
         }else{
             //manual action handling
             if(props.action){
-                if(stateNow.app.tabSelected == 'edit'){
+                if(stateNow.app.tabSelected == TAB_NAMES.edit ){
                     props.store.dispatch({type:props.action,payload:e.target.value,blockSelected:stateNow.app.blockSelected})
-                }else if(stateNow.app.tabSelected == 'copy'){
+                }else if(stateNow.app.tabSelected == TAB_NAMES.copy ){
                     props.store.dispatch({type:props.action,payload:e.target.value,copySelected:stateNow.app.copySelected,columnSelected:props.columnSelected})
                 }
                 //changing selectedBlock
@@ -272,21 +274,21 @@ function Menuitem(props) {
             return ret;
         }
         switch(props.type){
-            case 'text':
+            case MI_INPUT_TYPES.text:
                 ret.push(<input key={valueMI[1]+'TextInput'} value={inputValue()} onChange={handleMIchange} placeholder={props.placeholder} title={t(valueMI[1])}/>);
                 // ret.push(<textarea key={target[1]} className='text' onChange={handleMIchange} placeholder={props.placeholder} title={target[1]}>{inputValue()}</textarea>);
                 break;
-            case 'textarea':
+            case MI_INPUT_TYPES.textarea:
                 ret.push(<textarea key={valueMI[1]+'TextareaInput'} className='textarea' value={inputValue()} onChange={handleMIchange} placeholder={props.placeholder} title={t(valueMI[1])}></textarea>);
                 // ret.push(<input key={target[1]} value={inputValue()} onChange={handleMIchange} placeholder={props.placeholder} title={target[1]}/>);
                 break;
-            case 'size':
+            case MI_INPUT_TYPES.size:
                 ret.push(<input key={valueMI[1]+'SizeInput'} className='size' value={inputValue()} onChange={handleMIchange} placeholder={props.placeholder}  title={t(valueMI[1])}/>);
                 break;
-            case 'color':
+            case MI_INPUT_TYPES.color:
                 ret.push(<input key={valueMI[1]+'ColorInput'} className='color' type='color' value={inputValue()} onChange={handleMIchange} placeholder={props.placeholder}  title={t(valueMI[1])}/>);
                 break;
-            case 'selector':
+            case MI_INPUT_TYPES.selector:
                 
                 let _options = [['','']];
                 let miOptionsName = valueMI[1]+'Options';
@@ -314,7 +316,7 @@ function Menuitem(props) {
                 })
                 ret.push(<select key={valueMI[1]+'SelectorInput'} onChange={handleMIchange} value={inputValue()} title={valueMI[1]} >{options}</select>);
                 break;
-            case 'button':
+            case MI_INPUT_TYPES.button:
                 const getButtonClass = ()=>{
                     let _ret = '';
                     props.primary ? _ret+= 'primary': _ret+=''
@@ -327,7 +329,7 @@ function Menuitem(props) {
                 }
                 ret.push(<button className={getButtonClass()} key={valueMI[1]} onClick={handleMIchange} title={valueMI[1]} ><Icon image={props.icon} store={props.store}/>{getButtonTitle()}</button>);
                 break;
-            case 'file':
+            case MI_INPUT_TYPES.file:
                 const getTitle = ()=>{
                     let _ret = [];
                     props.title ? _ret.push(<span key='title'>{props.title}</span>) :  false;

@@ -1,16 +1,18 @@
 import actionTypes from './actionTypes';
 import langWords from '../langWords';
+import { colorModes, TAB_NAMES, tabOptions } from '../constants/constants' 
+
 const getinitialState = () => {
-    if(!window.localStorage.getItem('ODStore')){//TO DO for translation development
+    if(!window.localStorage.getItem('ODStore')){
         return  {
             name:'OptyDoc',
             version:'0.0.1',
-            colorMode:'light',
-            colorModeOptions:[['Light','light'],['Dark','dark']],
+            colorMode:colorModes[0] ||'light',
+            colorModeOptions:colorModes || [],
             languageCode:'en',
             languageWords:langWords(),
-            tabSelected:'edit',
-            tabSelectedOptions:[['Edit','edit'],['Copy','copy'],['Print','print']],
+            tabSelected:TAB_NAMES.edit,
+            tabSelectedOptions:tabOptions,
             blockSelected:'',
             copySelected:'',
         }  
@@ -25,15 +27,15 @@ const appReducer = (state = getinitialState(), action)=>{
             return {...state,colorMode:action.payload}
 
         case actionTypes.COLORMODE_TOGGLE:
-            let newColorMode = 'light';
-            switch(state.colorMode){
-                case 'light':newColorMode = 'dark';break;
-                case 'dark':newColorMode = 'light';break;
-            }
-            return {...state,colorMode:newColorMode}
-
+            if(! state.colorMode){return 0}
+            if(! colorModes){return 0}
+            let currentMode = colorModes.find(mode=>mode[1] == state.colorMode)
+            let newColorMode = colorModes[colorModes.indexOf(currentMode)+1]?.[1];
+            if(! newColorMode){ newColorMode = colorModes[0]?.[1]}
+            
+            return newColorMode && {...state,colorMode:newColorMode}
         case actionTypes.TAB_SET: 
-            if(['edit','copy','print'].indexOf(action.payload) > -1)
+            if(tabOptions.map(option=>option[1]).indexOf(action.payload) > -1)
             return {...state,tabSelected:action.payload};break;
 
         case actionTypes.SELECTEDBLOCK_SET:

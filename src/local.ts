@@ -1,4 +1,3 @@
-
 import store from "./store";
 export default function t(a:string){
     var codeNow = store.getState().app.languageCode

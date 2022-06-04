@@ -1,5 +1,6 @@
 import React from 'react'
 import actionTypes from '../reducers/actionTypes';
+import { TAB_NAMES } from '../constants/constants'
 function Block(props) {
     const stateNow = props.store.getState();  
     const blockData = props.blockData;
@@ -81,6 +82,8 @@ function Block(props) {
                 if(_isCopyIndexed){
                     //2
                     //TODO is static or variable?
+                    //add selector if just have options
+                    //add input(?) if text
                     if(_props.blockData.valueType != 'fixed'){
                         ret = [...formatInnerText(_getFromCopyRows(_props.store.getState(),_props.blockData.uuid,_props.copyIndex))]
                     }else{
@@ -107,11 +110,11 @@ function Block(props) {
         //TO DO what if the block is too small to select
         let blockOutline = ''
         //showing selected block
-        if(blockData.uuid === stateNow.app.blockSelected && stateNow.app.tabSelected == 'edit'){
+        if(blockData.uuid === stateNow.app.blockSelected && stateNow.app.tabSelected == TAB_NAMES.edit){
             blockOutline = 'var(--selected-border)'
         }
         //showing selected copy
-        if(blockData.parentID === '' && props.copyIndex+'' == stateNow.app.copySelected && stateNow.app.tabSelected == 'copy'){
+        if(blockData.parentID === '' && props.copyIndex+'' == stateNow.app.copySelected && stateNow.app.tabSelected == TAB_NAMES.copy){
             blockOutline = 'var(--selected-border)'
         }
         const checkForZoom = (_val)=>{
@@ -155,7 +158,7 @@ function Block(props) {
             if(['inherit','calc( auto * var(--zoom) )','calc( 0mm * var(--zoom) )'].indexOf(s[1]) == -1){
                 constructedStyle = {...constructedStyle,[s[0]]:[s[1]]}
             }
-        })
+        })      
         //custom styles
         blockStyle.customStyle.split('\n').forEach(s=>{
             const _s = s.split(':')      
@@ -173,12 +176,12 @@ function Block(props) {
     const handleClick = (e)=>{
         //selectBlock
         //TO DO if it is not a parent
-        if((blockData.uuid == e.target.id || blockData.uuid+'_p' == e.target.id) && stateNow.app.tabSelected == 'edit'){
+        if((blockData.uuid == e.target.id || blockData.uuid+'_p' == e.target.id) && stateNow.app.tabSelected == TAB_NAMES.edit){
             const clickedBlockId = e.target.id.replace('_p','');
             const clickedBlock = stateNow.template.children.filter(ch=>{return ch.uuid == clickedBlockId})[0]
             // const selectedBlock = stateNow.template.children.filter(ch=>{return ch.uuid == stateNow.app.blockSelected})[0]
             props.store.dispatch({type:actionTypes.SELECTEDBLOCK_SET,payload:clickedBlock.uuid})
-        }else if(blockData.uuid+'_'+props.copyIndex === e.target.id && stateNow.app.tabSelected == 'copy'){
+        }else if(blockData.uuid+'_'+props.copyIndex === e.target.id && stateNow.app.tabSelected == TAB_NAMES.copy){
             props.store.dispatch({type:actionTypes.SELECTEDCOPY_SET,payload:props.copyIndex})            
         }
     }
@@ -192,7 +195,7 @@ function Block(props) {
         return blockData.uuid;
     }
     const getTitle = ()=>{
-        if(stateNow.app.tabSelected == 'copy'){
+        if(stateNow.app.tabSelected == TAB_NAMES.copy){
             return `Copy ${props.copyIndex}`
         }
         return blockData.humanfriendlyID;
