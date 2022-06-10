@@ -1,17 +1,17 @@
-import React from 'react'
-import Sidemenu from './Sidemenu';
-import Topmenu from './Topmenu';
-import Stack from './Stack';
+import React from "react";
+import Sidemenu from "./Sidemenu";
+import Topmenu from "./Topmenu";
+import Stack from "./Stack";
 
-function Page(props) {
-  const getColorMode = (_props)=>{
-    return _props.store.getState().app.colorMode;
-  }
+function Page ({store}) {
+  const getColorMode = (store) => {
+    return store.getState().app.colorMode;
+  };
   return (
-    <div className={'Page '+getColorMode(props)}>
-       <Sidemenu store={props.store}/>
-       <Topmenu store={props.store}/>
-       <Stack store={props.store}/>
+    <div className={"Page " + getColorMode(store)}>
+      <Sidemenu store={store}/>
+      <Topmenu store={store}/>
+      <Stack store={store}/>
     </div>
   );
 }

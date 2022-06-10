@@ -1,27 +1,28 @@
-import React from 'react'
-import actionTypes from '../reducers/actionTypes';
-import t from '../local.ts'
-function Tab(props) {
-    const state = props.store.getState();
+import React from "react";
+import actionTypes from "../reducers/actionTypes";
+import t from "../local.ts";
+function Tab ({store, tabValue, tabIndex, tabName}) {
+  const stateNow = store.getState();
 
-    const getClasses = ()=>{
-        let classes = 'Tab ';
-        if(state.app.tabSelected == props.tabValue){
-            classes += 'active ';
-        }
-        return classes
+  const getClasses = (stateNow, tabValue) => {
+    let classes = "Tab ";
+    if(stateNow.app.tabSelected === tabValue) {
+      classes += "active ";
     }
-    const handleClick = ()=>{
-        props.store.dispatch({type:actionTypes.TAB_SET,payload:props.tabValue})
-    }
-    const handleKeyPress = (e)=>{
-        e.key == 'Enter'?handleClick():0;
-    }
-    return (
-    <div className={getClasses()} onClick={handleClick} onKeyPress={handleKeyPress} tabIndex={props.tabIndex}>
-        <span>{t(props.tabName)}</span>
+    return classes;
+  };
+  const handleClick = () => {
+    store.dispatch({type:actionTypes.TAB_SET,
+      payload: tabValue});
+  };
+  const handleKeyPress = (e) => {
+    e.key === "Enter" ? handleClick() : false;
+  };
+  return (
+    <div className={getClasses(stateNow, tabValue)} onClick={handleClick} onKeyPress={handleKeyPress} tabIndex={tabIndex}>
+      <span>{t(tabName)}</span>
     </div>
-    );
+  );
 }
 
 export default Tab;

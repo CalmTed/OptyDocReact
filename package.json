@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "react-scripts start",
-    "test": "react-scripts test"
+    "test": "react-scripts test",
+    "lint": "eslint ."
   },
   "jest": {
     "transform": {}
@@ -15,12 +16,14 @@
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-redux": "^7.2.6",
-    "react-scripts": "^5.0.0",
+    "react-scripts": "^5.0.1",
     "redux": "^4.1.2"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.16.5",
-    "babel-jest": "^27.4.5"
+    "babel-jest": "^27.4.5",
+    "eslint": "^8.17.0",
+    "eslint-plugin-react": "^7.30.0"
   },
   "browserslist": {
     "production": [
