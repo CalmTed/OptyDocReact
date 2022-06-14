@@ -8,7 +8,7 @@ function Block ({store, blockData, copyIndex}) {
   const tabSelected = stateNow.app.tabSelected;
   const getBlocks = (store, blockData, copyIndex) => {
     let ret = [];
-    const hisChildern = store.getState().template.children.filter(ch => { return ch.parentID === blockData.uuid; });
+    const hisChildern = stateNow.template.children.filter(ch => { return ch.parentID === blockData.uuid; });
     //no children content
     if(!hisChildern.length) {
       //multiline support
@@ -182,10 +182,9 @@ function Block ({store, blockData, copyIndex}) {
   const handleClick = (e) => {
     //selectBlock
     //TO DO if it is not a parent
-    if((blockData.uuid === e.target.id || blockData.uuid + "_p" === e.target.id) && stateNow.app.tabSelected === TAB_NAMES.edit) {
+    if((blockData.uuid === Number(e.target.id) || blockData.uuid + "_p" === e.target.id) && stateNow.app.tabSelected === TAB_NAMES.edit) {
       const clickedBlockId = e.target.id.replace("_p", "");
       const clickedBlock = stateNow.template.children.filter(ch => { return ch.uuid === Number(clickedBlockId); })[0];
-      console.log(stateNow.template.children);
       store.dispatch({type:actionTypes.SELECTEDBLOCK_SET,
         payload:clickedBlock.uuid});
     }else if(blockData.uuid + "_" + copyIndex === e.target.id && stateNow.app.tabSelected === TAB_NAMES.copy) {

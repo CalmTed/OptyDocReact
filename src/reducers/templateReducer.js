@@ -1,6 +1,9 @@
 import actionTypes from "./actionTypes";
 import {templateSizes} from "../constants/constants";
 
+const genUUID = () => {
+  return Math.round(Math.random() * 10000000);
+};
 const getinitialState = (newTemp = false) => {
   //SHORTCUT HERE for it to not to store localy
   let getTemplateSizesOptions = (templateSizes) => {
@@ -12,7 +15,7 @@ const getinitialState = (newTemp = false) => {
   };
   if(!window.localStorage.getItem("ODStore") || newTemp) {
     return  {
-      uuid:"000000",
+      uuid:genUUID(),
       name:"New template",
       dateCreated:new Date().getTime(),
       dateEdited:"0",
@@ -39,6 +42,7 @@ const getinitialState = (newTemp = false) => {
     return JSON.parse(window.localStorage.getItem("ODStore")).template;
   } 
 };
+
 const templateReducer = (state = getinitialState(), action) => {
   const getNewChildrenList = (property) => {
     let children = new Array(state.children)[0];
@@ -46,7 +50,7 @@ const templateReducer = (state = getinitialState(), action) => {
       "blockRemove"].includes(property)) {
       //just changing children property
       children.map((ch) => {
-        if(ch.uuid + "" === action.blockSelected + "") {
+        if(Number(ch.uuid) === Number(action.blockSelected)) {
           if(typeof ch[property] !== "undefined") {
             ch[property] = action.payload;
           }else{
@@ -58,7 +62,7 @@ const templateReducer = (state = getinitialState(), action) => {
       //custom comands
       switch(property) {
       case "newBlockAdd":
-        const uuid = Math.round(Math.random() * 10000000);//TO DO move to emmiter method
+        const uuid = genUUID();
         const localId = children.length;
         const HFId = "b" + (localId + 1);
         const parentID = action.blockSelected;
@@ -80,7 +84,7 @@ const templateReducer = (state = getinitialState(), action) => {
               "copied"]
           ],
           innerText:"b" + localId,
-          variableTitle:"",   
+          variableTitle:"",
           copyChannel:HFId,
           style:{
             width:"auto", 

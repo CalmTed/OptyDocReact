@@ -227,9 +227,13 @@ function Sidemenu ({store}) {
                 o]; });
               return miOptions;
             };
-            
+            const getDataList = () => {
+              const colId = stateNow.copies.columns.indexOf(stateNow.copies.columns.find(c => Number(c.target) === Number(col.target)));
+              const datalist = stateNow.copies.rows.map(row => row[colId]).filter((value, index, self) => { return (self.indexOf(value) === index && value.length > 0); });
+              return datalist;
+            };
             ret.push(<div className='spacer' key={"spacerInput" + col.target} >{col.title}</div>);
-            ret.push(<Menuitem key={col.target + "Input"} store={store} value={"selectedCopy." + col.target} action={actionTypes.COPIES_ROW_SET} columnSelected={col.target} type={getMiType(col.type)} options={getOptions(col.options)}/>);
+            ret.push(<Menuitem key={col.target + "CopyInput"} store={store} value={"selectedCopy." + col.target} action={actionTypes.COPIES_ROW_SET} columnSelected={col.target} type={getMiType(col.type)} options={getOptions(col.options)} dataList={getDataList()}/>);
           });
         }
       }

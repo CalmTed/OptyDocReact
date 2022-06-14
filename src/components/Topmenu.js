@@ -18,7 +18,7 @@ function Topmenu ({store}) {
       return stateNow.template.dateEdited === "0" ? {disabled:true} : {};
     };
     ret.push(<Topbutton key='importTemplateButton' name='importTemplate' store={store}></Topbutton>);
-    ret.push(<Topbutton key='newTemplateButton' name='newTemplate' store={store}></Topbutton>);    
+    ret.push(<Topbutton key='newTemplateButton' name='newTemplate' store={store}></Topbutton>);
     ret.push(<Topbutton {...isExportDisabled(stateNow)} key='exportTemplateButton' name='exportTemplate' store={store}></Topbutton>);
     return ret;
   };

@@ -20,7 +20,7 @@ const capilalize = (str) => {
 };
 
 export const TAB_NAMES = {
-  edit:"edited",
+  edit:"edit",
   copy:"copy",
   print:"print"
 };

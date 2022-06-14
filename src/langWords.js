@@ -17,6 +17,7 @@ export default function langWords () {
       "Edit":"Редактор",
       "Copies":"Копії",
       "Print":"Друк",
+      "Print options":"Варіанти друку",
       "Template":"Макет",
       "Margin":"Відступи",
       "newBlock":"Додати блок",

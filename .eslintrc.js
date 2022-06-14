@@ -53,7 +53,7 @@ module.exports = {
     "arrow-spacing":"error",
     "block-spacing":"error",
     "array-bracket-spacing":"error",
-    "array-element-newline":"error",
+    "array-element-newline":"off",
     "comma-dangle":"error",
     "comma-spacing":"error",
     "object-curly-spacing":"error",

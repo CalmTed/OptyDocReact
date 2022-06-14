@@ -22,10 +22,10 @@ function Stack ({store}) {
     }
     return ret;
   };
-  const getCopies = (_startFrom = 0, _perPage = Infinity) => {
+  const getCopies = (startFrom = 0, perPage = Infinity) => {
     let ret = [];
     stateNow.copies.rows.forEach((row, ci) => {
-      if(ci >= _startFrom && ci < _startFrom + _perPage) {
+      if(ci >= startFrom && ci < startFrom + perPage) {
         stateNow.template.children.filter(ch => { return ch.parentID === ""; }).forEach(childBlock => {
           ret.push(<Block key={`${childBlock.uuid}_${ci}`} blockData={childBlock} store={store} copyIndex={ci}/>);
         });
@@ -66,7 +66,7 @@ function Stack ({store}) {
       }
       break;
     default:
-      ret.push(<h1 key='placeholder'   className='stackPlaceholder'>{t("No tab selected")}</h1>);
+      ret.push(<h1 key='placeholder'   className='stackPlaceholder'>{t("Nothing to show")}</h1>);
       break;
     }
         

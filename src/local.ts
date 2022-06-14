@@ -7,6 +7,8 @@ export default function t (a:string) {
   }else{
     if(typeof words[codeNow][a] !== "undefined") {
       return words[codeNow][a];
+    }else if (/(\d{1,}$)|(^\d{1,}$)/g.test(a)) {
+      return a;
     }else{
       console.log(`'${a}':'',`);
       return a;

@@ -4,7 +4,7 @@ import actionTypes from "../reducers/actionTypes";
 import t from "../local.ts";
 import {TAB_NAMES, MI_INPUT_TYPES} from "../constants/constants";
 
-function Menuitem ({store, value, type, action, placeholder, fileType, columnSelected, icon, primary, title, options}) {
+function Menuitem ({store, value, type, action, placeholder, fileType, columnSelected, icon, primary, title, options, dataList}) {
   const stateNow = store.getState();
   const valueMI = value.split(".");
   const getClasses = () => {
@@ -22,8 +22,10 @@ function Menuitem ({store, value, type, action, placeholder, fileType, columnSel
     case MI_INPUT_TYPES.file:
       ret += "file";
       break;
+    default:
+      ret += type;
+      break;
     }
-    // ret += type
     return ret;
   };
   const compareArr = (a, b) => {
@@ -69,7 +71,6 @@ function Menuitem ({store, value, type, action, placeholder, fileType, columnSel
           }
           return arr;
         }
-        // console.log(_fileText)
         let formatedTableData = parseCSV(fileText);
         //read first line
                 
@@ -160,11 +161,13 @@ function Menuitem ({store, value, type, action, placeholder, fileType, columnSel
       //manual action handling
       if(action) {
         if(stateNow.app.tabSelected === TAB_NAMES.edit) {
-          store.dispatch({type:action,
+          store.dispatch({
+            type:action,
             payload:e.target.value,
             blockSelected:stateNow.app.blockSelected});
         }else if(stateNow.app.tabSelected === TAB_NAMES.copy) {
-          store.dispatch({type:action,
+          store.dispatch({
+            type:action,
             payload:e.target.value,
             copySelected:stateNow.app.copySelected,
             columnSelected:columnSelected});
@@ -175,13 +178,22 @@ function Menuitem ({store, value, type, action, placeholder, fileType, columnSel
           if(
             ((action === actionTypes.BLOCK_INNER_TEXT_SET) || (action === actionTypes.BLOCK_VALUE_TYPE_SET) || (action === actionTypes.BLOCK_VARIABLE_TITLE_SET))
           ) {
-            //loop through all children and find ones that have variable and selectors
-            let variablesListObjects = stateNow.template.children.filter((b) => {
-              return ["selector",
-                "variable",
-                "date"].includes(b.valueType);
-            });
-            let columnsObject = (variablesListObjects) => {
+            const findVariableChildren = (children, parentID, returnList = []) => {
+              children.forEach(rootChild => {
+                if (rootChild.parentID === parentID) {
+                  const isVariable = (["variable", "selector"].includes(rootChild.valueType));
+                  const hasChildren = typeof children.find(child => child.parentID === rootChild.uuid) !== "undefined";
+                  if (!hasChildren && isVariable) {
+                    returnList.push(rootChild);
+                  }else{
+                    returnList = findVariableChildren(children, rootChild.uuid, returnList);
+                  }
+                }
+              });
+              return returnList;
+            };
+            const variablesListObjects = findVariableChildren(stateNow.template.children, "");
+            const columnsObject = (variablesListObjects) => {
               let ret = [];
               variablesListObjects.forEach(obj => {
                 let type = "variable";
@@ -264,7 +276,7 @@ function Menuitem ({store, value, type, action, placeholder, fileType, columnSel
   const getContent = () => {
     let ret = [];
 
-    let inputValue = () => {
+    let getInputValue = () => {
       let ret = "";
       if(valueMI[0] === "selectedBlock") {
         //search for needed block
@@ -283,8 +295,10 @@ function Menuitem ({store, value, type, action, placeholder, fileType, columnSel
             selectedColumnID = i;
           }
         });
-        if(typeof stateNow.copies.rows[stateNow.app.copySelected] !== "undefined" && stateNow.copies.rows[stateNow.app.copySelected][selectedColumnID] !== null) {
+        if(typeof stateNow.copies.rows[stateNow.app.copySelected] !== "undefined" && typeof stateNow.copies.rows[stateNow.app.copySelected][selectedColumnID] !== "undefined") {
           ret = stateNow.copies.rows[stateNow.app.copySelected][selectedColumnID];
+        }else{
+          ret = stateNow.template.children.find((b) => { return Number(b.uuid) === Number(columnSelected); }).innerText;
         }
       }
       if(stateNow[valueMI[0]]) {
@@ -292,20 +306,28 @@ function Menuitem ({store, value, type, action, placeholder, fileType, columnSel
       }
       return ret;
     };
+    const getDataListOptions = (dataList = []) => {
+      
+      const dataListOptions = dataList.map(option => <option key={`${option}_option`} value={option}></option>);
+      return dataListOptions;
+    };
     switch(type) {
     case MI_INPUT_TYPES.text:
-      ret.push(<input key={valueMI[1] + "TextInput"} value={inputValue()} onChange={handleMIchange} placeholder={placeholder} title={t(valueMI[1])}/>);
+      ret.push(<div key={valueMI[1] + "textInputWrapper"} >
+        <input key={valueMI[1] + "TextInput"} list={valueMI[1] + "TextInputList"} value={getInputValue()} onChange={handleMIchange} placeholder={placeholder} title={t(valueMI[1])}/>
+        <datalist key= {valueMI[1] + "TextInputListKey"} id={valueMI[1] + "TextInputList"}>{getDataListOptions(dataList)}</datalist>
+      </div>);
       // ret.push(<textarea key={target[1]} className='text' onChange={handleMIchange} placeholder={placeholder} title={target[1]}>{inputValue()}</textarea>);
       break;
     case MI_INPUT_TYPES.textarea:
-      ret.push(<textarea key={valueMI[1] + "TextareaInput"} className='textarea' value={inputValue()} onChange={handleMIchange} placeholder={placeholder} title={t(valueMI[1])}></textarea>);
+      ret.push(<textarea key={valueMI[1] + "TextareaInput"} className='textarea' value={getInputValue()} onChange={handleMIchange} placeholder={placeholder} title={t(valueMI[1])}></textarea>);
       // ret.push(<input key={target[1]} value={inputValue()} onChange={handleMIchange} placeholder={placeholder} title={target[1]}/>);
       break;
     case MI_INPUT_TYPES.size:
-      ret.push(<input key={valueMI[1] + "SizeInput"} className='size' value={inputValue()} onChange={handleMIchange} placeholder={placeholder}  title={t(valueMI[1])}/>);
+      ret.push(<input key={valueMI[1] + "SizeInput"} className='size' value={getInputValue()} onChange={handleMIchange} placeholder={placeholder}  title={t(valueMI[1])}/>);
       break;
     case MI_INPUT_TYPES.color:
-      ret.push(<input key={valueMI[1] + "ColorInput"} className='color' type='color' value={inputValue()} onChange={handleMIchange} placeholder={placeholder}  title={t(valueMI[1])}/>);
+      ret.push(<input key={valueMI[1] + "ColorInput"} className='color' type='color' value={getInputValue()} onChange={handleMIchange} placeholder={placeholder}  title={t(valueMI[1])}/>);
       break;
     case MI_INPUT_TYPES.selector:
                 
@@ -335,7 +357,7 @@ function Menuitem ({store, value, type, action, placeholder, fileType, columnSel
           return <option key={index} value={optionValue}>{t(title)}</option>;
         }
       });
-      ret.push(<select key={valueMI[1] + "SelectorInput"} onChange={handleMIchange} value={inputValue()} title={valueMI[1]} >{selectorOptionsHTML}</select>);
+      ret.push(<select key={valueMI[1] + "SelectorInput"} onChange={handleMIchange} value={getInputValue()} title={valueMI[1]} >{selectorOptionsHTML}</select>);
       break;
     case MI_INPUT_TYPES.button:
       let getButtonClass = (primary) => {
