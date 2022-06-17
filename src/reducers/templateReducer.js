@@ -1,42 +1,24 @@
-import actionTypes from "./actionTypes";
-import {templateSizes} from "../constants/constants";
+import actionTypes from "../constants/actionTypes";
+import {templateOrientations, templateSizes} from "../constants/app";
+import {BLOCK_STYLE_NAMES, BLOCK_STYLE_SETTINGS, BLOCK_VALUE_TYPE_OPTIONS} from "../constants/block";
+import {initialValuesTemplate, initialValuesBlock} from "../constants/initialValues";
 
 const genUUID = () => {
   return Math.round(Math.random() * 10000000);
 };
 const getinitialState = (newTemp = false) => {
   //SHORTCUT HERE for it to not to store localy
-  let getTemplateSizesOptions = (templateSizes) => {
-    if(!templateSizes) { return undefined; }
-    return templateSizes.map(size => {
-      return [size,
-        size];
-    });
-  };
+  
   if(!window.localStorage.getItem("ODStore") || newTemp) {
     return  {
       uuid:genUUID(),
-      name:"New template",
       dateCreated:new Date().getTime(),
-      dateEdited:"0",
-      creator:"man",
-      pageSize: typeof templateSizes !== "undefined" ? Object.keys(templateSizes)[0] : "A4",
-      pageSizeOptions: typeof templateSizes !== "undefined" ? getTemplateSizesOptions(Object.keys(templateSizes)) : [["A4",
-        "A4"]],
-      pageOrientation:"portrait",
-      pageOrientationOptions:[["Portrait",
-        "portrait"],
-      ["Landscape",
-        "landscape"]],
-      marginLeft:"0mm",
-      marginRight:"0mm",
-      marginTop:"0mm",
-      marginBottom:"0mm",
-      zoom:100,
+      dateEdited:null,
       fitsW:0,
       fitsH:0,
-      children:[]
-    };  
+      children:[],
+      ...initialValuesTemplate
+    };
   }else{
     console.debug("Getting app data from localstorage");
     return JSON.parse(window.localStorage.getItem("ODStore")).template;
@@ -45,13 +27,13 @@ const getinitialState = (newTemp = false) => {
 
 const templateReducer = (state = getinitialState(), action) => {
   const getNewChildrenList = (property) => {
-    let children = new Array(state.children)[0];
+    let children = JSON.parse(JSON.stringify(state.children));
     if(!["newBlockAdd",
       "blockRemove"].includes(property)) {
       //just changing children property
       children.map((ch) => {
         if(Number(ch.uuid) === Number(action.blockSelected)) {
-          if(typeof ch[property] !== "undefined") {
+          if((property in ch)) {
             ch[property] = action.payload;
           }else{
             ch.style[property] = action.payload;
@@ -72,125 +54,9 @@ const templateReducer = (state = getinitialState(), action) => {
           localID:localId,
           parentID:parentID, //selected block
           humanfriendlyID:HFId,
-          valueType:"fixed",
-          valueTypeOptions:[
-            ["Fixed",
-              "fixed"],
-            ["Variable",
-              "variable"],
-            ["Selector",
-              "selector"],
-            ["Copy from",
-              "copied"]
-          ],
           innerText:"b" + localId,
-          variableTitle:"",
           copyChannel:HFId,
-          style:{
-            width:"auto", 
-            height:"auto",
-            alignVertical:"inherit",
-            alignVerticalOptions:[
-              ["Inherit",
-                "inherit"],
-              ["Top",
-                "start"],
-              ["Center",
-                "center"],
-              ["Bottom",
-                "end"],
-              ["Space around",
-                "space-around"],
-              ["Space between",
-                "space-between"],
-              ["Space evenly",
-                "space-evenly"],
-              ["Space evenly",
-                "space-evenly"]
-            ],
-            alignHorizontal:"inherit",
-            alignHorizontalOptions:[
-              ["Inherit",
-                "inherit"],
-              ["Left",
-                "start"],
-              ["Center",
-                "center"],
-              ["Right",
-                "end"],
-              ["Space around",
-                "space-around"],
-              ["Space between",
-                "space-between"],
-              ["Space evenly",
-                "space-evenly"]
-            ],
-            displayType:"inherit",
-            displayTypeOptions:[
-              ["Inline",
-                "inline"],
-              ["Block",
-                "block"],
-              ["Flex",
-                "flex"],
-              ["Inherit",
-                "inherit"]
-            ],
-                           
-            marginTop:"0mm",
-            marginBottom:"0mm",
-            marginLeft:"0mm",
-            marginRight:"0mm",
-
-            fontFamily:"inherit",
-            fontFamilyOptions:[
-              ["Arial",
-                "Arial"],
-              ["Times New Roman",
-                "Times New Roman"],
-              ["Calibri",
-                "Calibri"],
-              ["Roboto",
-                "Roboto"],
-              ["Inherit",
-                "inherit"]
-            ],
-            fontSize:"inherit",
-            fontColor:"inherit",
-            backgroundColor:"inherit",
-            fontBold:"inherit",
-            fontBoldOptions:[
-              ["Thin",
-                "100"],
-              ["Normal",
-                "400"],
-              ["Bold",
-                "600"],
-              ["Bolder",
-                "900"],
-              ["Inherit",
-                "inherit"]
-            ],
-            fontItalic:"inherit",
-            fontItalicOptions:[
-              ["Not italic",
-                "none"],
-              ["Italic",
-                "italic"],
-              ["Inherit",
-                "inherit"]
-            ],
-            fontUnderline:"inherit",
-            fontUnderlineOptions:[
-              ["Non underline",
-                "none"],
-              ["Underline",
-                "underline"],
-              ["Inherit",
-                "inherit"]
-            ],
-            customStyle:""
-          }
+          ...initialValuesBlock
         }); break;
       case "blockRemove":
         const getParentList = (children, parID, parList) => {
@@ -225,19 +91,23 @@ const templateReducer = (state = getinitialState(), action) => {
     //units: mm,cm,in,pt,%
     return /^(\d{0,4})([a-z]{0,7}|%)$/.test(_value);
   };
-  const isValidOption = (parameter, payload) => {
-    if(typeof state[parameter + "Options"] !== "undefined") {
-      return state[parameter + "Options"].map((o) => { return o[1]; }).includes(payload);
-    }else {
-      let selectedBlock = state.children.filter(ch => ch.uuid + "" === action.blockSelected + "")[0];
-      if(typeof selectedBlock[parameter + "Options"] !== "undefined") {
-        return selectedBlock[parameter + "Options"].map((o) => { return o[1]; }).includes(payload);
-      }else if(typeof selectedBlock.style[parameter + "Options"] !== "undefined") {
-        return selectedBlock.style[parameter + "Options"].map((o) => { return o[1]; }).includes(payload);
-      }else{
-        return false;
-      }
+  const isValidOption = (payload, options) => {
+    if(options.includes(payload)) {
+      return true;
     }
+    return false;
+    // if(typeof state[parameter + "Options"] !== "undefined") {
+    //   return state[parameter + "Options"].map((o) => { return o[1]; }).includes(payload);
+    // }else {
+    //   let selectedBlock = state.children.filter(ch => ch.uuid + "" === action.blockSelected + "")[0];
+    //   if(typeof selectedBlock[parameter + "Options"] !== "undefined") {
+    //     return selectedBlock[parameter + "Options"].map((o) => { return o[1]; }).includes(payload);
+    //   }else if(typeof selectedBlock.style[parameter + "Options"] !== "undefined") {
+    //     return selectedBlock.style[parameter + "Options"].map((o) => { return o[1]; }).includes(payload);
+    //   }else{
+    //     return false;
+    //   }
+    // }
 
   };
   const isValidText = (value) => {
@@ -281,14 +151,14 @@ const templateReducer = (state = getinitialState(), action) => {
       return state;
     }
   case actionTypes.TEMPLATE_PAGE_SIZE_SET:
-    if(isValidOption("pageSize", action.payload)) {
+    if(isValidOption(action.payload, Object.keys(templateSizes))) {
       return returnMiddleware({...state,
         pageSize:action.payload});
     }else{
       return state;            
     }
   case actionTypes.TEMPLATE_PAGE_ORIENATION_SET:
-    if(isValidOption("pageOrientation", action.payload)) {
+    if(isValidOption(action.payload, Object.keys(templateOrientations))) {
       return returnMiddleware({...state,
         pageOrientation:action.payload});
     }else{
@@ -345,21 +215,22 @@ const templateReducer = (state = getinitialState(), action) => {
       return state;
     }
   case actionTypes.BLOCK_ALIGN_VERTICAL_SET:
-    if(isValidOption("alignVertical", action.payload)) {
+    if(isValidOption(action.payload, BLOCK_STYLE_SETTINGS[BLOCK_STYLE_NAMES.alignVertical].selectorOptions.map((option) => option[1]))) {
       return returnMiddleware({...state,
         children:getNewChildrenList("alignVertical")});
     }else{
       return state;
     }
   case actionTypes.BLOCK_ALIGN_HORIZONTAL_SET:
-    if(isValidOption("alignHorizontal", action.payload)) {
+    if(isValidOption(action.payload, BLOCK_STYLE_SETTINGS[BLOCK_STYLE_NAMES.alignHorizontal].selectorOptions.map((option) => option[1]))) {
       return returnMiddleware({...state,
         children:getNewChildrenList("alignHorizontal")});
     }else{
       return state;
     }
   case actionTypes.BLOCK_DISPLAY_TYPE_SET:
-    if(isValidOption("displayType", action.payload)) {
+
+    if(isValidOption(action.payload, BLOCK_STYLE_SETTINGS[BLOCK_STYLE_NAMES.displayType].selectorOptions.map((option) => option[1]))) {
       return returnMiddleware({...state,
         children:getNewChildrenList("displayType")});
     }else{
@@ -394,7 +265,7 @@ const templateReducer = (state = getinitialState(), action) => {
       return state;
     }
   case actionTypes.BLOCK_FONT_FAMILY_SET:
-    if(isValidOption("fontFamily", action.payload)) {
+    if(isValidOption(action.payload, BLOCK_STYLE_SETTINGS[BLOCK_STYLE_NAMES.fontFamily].selectorOptions.map((option) => option[1]))) {
       return returnMiddleware({...state,
         children:getNewChildrenList("fontFamily")});
     }else{
@@ -423,21 +294,21 @@ const templateReducer = (state = getinitialState(), action) => {
       return state;
     }
   case actionTypes.BLOCK_FONT_BOLD_SET:
-    if(isValidOption("fontBold", action.payload)) {
+    if(isValidOption(action.payload, BLOCK_STYLE_SETTINGS[BLOCK_STYLE_NAMES.fontBold].selectorOptions.map((option) => option[1]))) {
       return returnMiddleware({...state,
         children:getNewChildrenList("fontBold")});
     }else{
       return state;
     }
   case actionTypes.BLOCK_FONT_ITALIC_SET:
-    if(isValidOption("fontItalic", action.payload)) {
+    if(isValidOption(action.payload, BLOCK_STYLE_SETTINGS[BLOCK_STYLE_NAMES.fontItalic].selectorOptions.map((option) => option[1]))) {
       return returnMiddleware({...state,
         children:getNewChildrenList("fontItalic")});
     }else{
       return state;
     }
   case actionTypes.BLOCK_FONT_UNDERLINE_SET:
-    if(isValidOption("fontUnderline", action.payload)) {
+    if(isValidOption(action.payload, BLOCK_STYLE_SETTINGS[BLOCK_STYLE_NAMES.fontUnderline].selectorOptions.map((option) => option[1]))) {
       return returnMiddleware({...state,
         children:getNewChildrenList("fontUnderline")});
     }else{
@@ -451,7 +322,7 @@ const templateReducer = (state = getinitialState(), action) => {
       return state;
     }
   case actionTypes.BLOCK_VALUE_TYPE_SET:
-    if(isValidOption("valueType", action.payload)) {
+    if(isValidOption(action.payload, Object.keys(BLOCK_VALUE_TYPE_OPTIONS))) {
       return returnMiddleware({...state,
         children:getNewChildrenList("valueType")});
     }else{

@@ -1,7 +1,9 @@
 import React from "react";
 import Icon from "./Icon";
-import actionTypes from "../reducers/actionTypes";
 import t from "../local.ts";
+import actionTypes from "../constants/actionTypes";
+import {exportTemplateFile, importTemplateFile} from "../utils/handleTemplateFile";
+
 function Topbutton ({disabled = false, name, store}) {
   const stateNow = store.getState();
   const isDisabled = (name) => {
@@ -21,9 +23,7 @@ function Topbutton ({disabled = false, name, store}) {
   const handleClick = (e) => {
     //TODO check if not disabled
     const blockSelected = stateNow.app.blockSelected;
-    const getCheckSum = (_string = "") => {
-      return Math.abs(_string.split("").reduce((a, b) => { a = ((a << 5) - a) + b.charCodeAt(0); return a & a; }));
-    };
+    
     if(disabled) {
       return false;
     }
@@ -55,7 +55,7 @@ function Topbutton ({disabled = false, name, store}) {
         store.dispatch({type:actionTypes.SELECTEDBLOCK_SET,
           payload:""});
       };
-      if(stateNow.template.dateEdited !== "0") {
+      if(stateNow.template.dateEdited) {
         if(confirm(t("Delete existing?"))) {
           setNewTemp();
         }
@@ -64,21 +64,9 @@ function Topbutton ({disabled = false, name, store}) {
       }
       break;
     case "exportTemplate":
-      const saveFile = (textToSave, fileName) => {
-        let link = document.createElement("a");
-        document.body.appendChild(link);
-        link.style = "display: none";
-        let url = "data:application/json;charset=utf-8,%EF%BB%BF" + encodeURI(textToSave);
-        link.href = url;
-        link.download = fileName;
-        link.click();
-        window.URL.revokeObjectURL(url);
-      };
-      let fileContent = {...stateNow.template};
-      fileContent.version = stateNow.app.version;
-      fileContent.checksum = getCheckSum(JSON.stringify(fileContent));
-      let fileJSONContent = JSON.stringify(fileContent);
-      saveFile(fileJSONContent, stateNow.template.name + ".optydoc");
+      exportTemplateFile(stateNow.template, stateNow.app.version, () => {
+        console.log("saved successfully");
+      });
       break;
     case "importTemplate":
       if(typeof e.target === "undefined") {
@@ -90,37 +78,19 @@ function Topbutton ({disabled = false, name, store}) {
       if(typeof e.target.files[0] === "undefined") {
         return false;
       }
-      if(stateNow.template.dateEdited !== "0") {
+      if(stateNow.template.dateEdited) {
         if(!confirm(t("Delete existing?"))) {
           return false;
         }
       }
-      let file = e.target.files[0];
-      let fileText = "";
-      let fileReader = new FileReader();
-      fileReader.onload = function () {
-        fileText = fileReader.result;
-        let templateData = JSON.parse(fileText);
-        let valid = true;
-        //check checksum
-        if(templateData.checksum !== getCheckSum(fileText.replace(/,"checksum":\d{1,10}/, ""))) {
-          valid = false;
-          console.warn("invalid checksum");
-        }
-        //check version
-        if(templateData.version !== stateNow.app.version) {
-          valid = false;
-          console.warn("invalid version");
-        }
-        if(valid) {
-          store.dispatch({type:actionTypes.TEMPLATE_OPEN_TEMPLATE,
-            payload:templateData});
-        }else{
-          //TO DO info box here
-          console.warn("invalid file");
-        }
-      };
-      fileReader.readAsText(file);
+      importTemplateFile(e.target.files[0], stateNow.app.version, (templateData) => {
+        store.dispatch({type:actionTypes.TEMPLATE_OPEN_TEMPLATE,
+          payload:templateData});
+        
+      }, (err) => {
+        console.warn(err);
+      });
+      e.target.value = null;
       break;
     case "language":
       store.dispatch({type:actionTypes.LANGCODE_TOGGLE});

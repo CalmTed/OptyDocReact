@@ -14,9 +14,11 @@ export const templateSizes = {
   "A5":["148mm",
     "209.9mm"]
 };
-
-const capilalize = (str) => {
-  return  str.charAt(0).toUpperCase() + str.substr(1);
+export const templateOrientations = {
+  "portrait": ["Portrait",
+    "portrait"],
+  "landscape": ["Landscape",
+    "landscape"]
 };
 
 export const TAB_NAMES = {
@@ -25,6 +27,9 @@ export const TAB_NAMES = {
   print:"print"
 };
 
+const capilalize = (str) => {
+  return  str.charAt(0).toUpperCase() + str.substr(1);
+};
 export const tabOptions = Object.values(TAB_NAMES).map(tabName => {
   return [capilalize(tabName),
     tabName];

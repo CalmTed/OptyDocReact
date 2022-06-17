@@ -1,17 +1,15 @@
 import React from "react";
 import Tab from "./Tab";
 import Menuitem from "./Menuitem";
-import actionTypes from "../reducers/actionTypes";
+import actionTypes from "../constants/actionTypes";
 import t from "../local.ts";
-import {TAB_NAMES, MI_INPUT_TYPES} from "../constants/constants";
-import {BLOCK_STYLE_NAMES} from "../constants/block";
+import {TAB_NAMES, tabOptions, MI_INPUT_TYPES, templateSizes, templateOrientations} from "../constants/app";
+import {BLOCK_STYLE_NAMES, BLOCK_STYLE_SETTINGS, BLOCK_VALUE_TYPE_OPTIONS} from "../constants/block";
 
 function Sidemenu ({store}) {
   const stateNow = store.getState();
   const getEditMenuContent = () => {
     let ret = [];
-    //TODO get if any block selected
-    //TODO get if template selected
     const selectBlock = e => {
       store.dispatch({type:actionTypes.SELECTEDBLOCK_SET,
         payload:e.target.id.replace("_link", "")});
@@ -23,10 +21,24 @@ function Sidemenu ({store}) {
     var blockSelectedNeigborList = [];
     if(stateNow.app.blockSelected === "" || !stateNow.template.children.length) {
       //TEMPLATE SETINGS
+      // const pageSizeOptions = 
+      let getTemplateSizesOptions = (templateSizes) => {
+        if(!templateSizes) { return undefined; }
+        return Object.keys(templateSizes).map(size => {
+          return [size,
+            size];
+        });
+      };
+      let getTemplateOrientationOptions = (templateOrientations) => {
+        if(!templateOrientations) { return undefined; }
+        return Object.values(templateOrientations).map(([title, value]) => {
+          return [title, value];
+        });
+      };
       ret.push(<div className='spacer' key='spacerTemplate' >{t("Template")}</div>);
       ret.push(<Menuitem key='name' store={store} value="template.name" action={actionTypes.TEMPLATE_NAME_SET} type={ MI_INPUT_TYPES.text } placeholder="Template name" />);
-      ret.push(<Menuitem key='pageSize' store={store} value="template.pageSize" action={actionTypes.TEMPLATE_PAGE_SIZE_SET} type={ MI_INPUT_TYPES.selector } />);
-      ret.push(<Menuitem key='pageOrientation' store={store} value="template.pageOrientation" action={actionTypes.TEMPLATE_PAGE_ORIENATION_SET} type={ MI_INPUT_TYPES.selector } />);
+      ret.push(<Menuitem key='pageSize' store={store} value="template.pageSize" action={actionTypes.TEMPLATE_PAGE_SIZE_SET} type={ MI_INPUT_TYPES.selector } options={ getTemplateSizesOptions(templateSizes) } />);
+      ret.push(<Menuitem key='pageOrientation' store={store} value="template.pageOrientation" action={actionTypes.TEMPLATE_PAGE_ORIENATION_SET} type={ MI_INPUT_TYPES.selector } options={ getTemplateOrientationOptions(templateOrientations) } />);
       ret.push(<div className='spacer' key='spacerMargin' >{t("Margin")}</div>);
       ret.push(<Menuitem key='marginTop' store={store} value="template.marginTop" action={actionTypes.TEMPLATE_MARGIN_TOP_SET} type={ MI_INPUT_TYPES.size } placeholder="M top" />);
       ret.push(<Menuitem key='marginBottom' store={store} value="template.marginBottom" action={actionTypes.TEMPLATE_MARGIN_BOTTOM_SET} type={ MI_INPUT_TYPES.size } placeholder="M bottom" />);
@@ -91,7 +103,15 @@ function Sidemenu ({store}) {
         //miData: value,type,action
         let miPlaceholder = miData.value;
         let miOptions = typeof miData.options !== "undefined" ? miData.options : [];
-        ret.push(<Menuitem key={miData.value} store={store} value= {"selectedBlock." + miData.value} type={miData.type} action={miData.action} placeholder={miPlaceholder} options={miOptions}/>);
+        ret.push(<Menuitem 
+          key={miData.value} 
+          store={store} 
+          value= {"selectedBlock." + miData.value} 
+          type={miData.type} 
+          action={miData.action} 
+          placeholder={miPlaceholder} 
+          options={miOptions}
+        />);
       };
       genBlockMI({value: BLOCK_STYLE_NAMES.width,
         type: MI_INPUT_TYPES.size,
@@ -101,7 +121,9 @@ function Sidemenu ({store}) {
         action:actionTypes.BLOCK_HEGHT_SET});
       genBlockMI({value: BLOCK_STYLE_NAMES.displayType,
         type: MI_INPUT_TYPES.selector,
-        action:actionTypes.BLOCK_DISPLAY_TYPE_SET});
+        action:actionTypes.BLOCK_DISPLAY_TYPE_SET,
+        options: BLOCK_STYLE_SETTINGS[BLOCK_STYLE_NAMES.displayType].selectorOptions
+      });
       genBlockMI({value:BLOCK_STYLE_NAMES.backgroundColor,
         type: MI_INPUT_TYPES.color,
         action:actionTypes.BLOCK_BACKGROUND_COLOR_SET});
@@ -109,10 +131,14 @@ function Sidemenu ({store}) {
         ret.push(<div className='spacer' key='spacerAlign' >{t("Align")}</div>);
         genBlockMI({value: BLOCK_STYLE_NAMES.alignVertical,
           type: MI_INPUT_TYPES.selector,
-          action:actionTypes.BLOCK_ALIGN_VERTICAL_SET});
+          action:actionTypes.BLOCK_ALIGN_VERTICAL_SET,
+          options: BLOCK_STYLE_SETTINGS[BLOCK_STYLE_NAMES.alignVertical].selectorOptions
+        });
         genBlockMI({value: BLOCK_STYLE_NAMES.alignHorizontal,
           type: MI_INPUT_TYPES.selector,
-          action:actionTypes.BLOCK_ALIGN_HORIZONTAL_SET});
+          action:actionTypes.BLOCK_ALIGN_HORIZONTAL_SET,
+          options: BLOCK_STYLE_SETTINGS[BLOCK_STYLE_NAMES.alignVertical].selectorOptions
+        });
         ret.push(<div className='spacer' key='spacerMargin' >{t("Margin")}</div>);
         genBlockMI({value: BLOCK_STYLE_NAMES.marginTop,
           type: MI_INPUT_TYPES.size,
@@ -130,7 +156,9 @@ function Sidemenu ({store}) {
       ret.push(<div className='spacer' key='spacerText' >{t("Text")}</div>);
       genBlockMI({value: BLOCK_STYLE_NAMES.fontFamily,
         type: MI_INPUT_TYPES.selector,
-        action:actionTypes.BLOCK_FONT_FAMILY_SET});
+        action:actionTypes.BLOCK_FONT_FAMILY_SET,
+        options: BLOCK_STYLE_SETTINGS[BLOCK_STYLE_NAMES.fontFamily].selectorOptions
+      });
       genBlockMI({value: BLOCK_STYLE_NAMES.fontSize,
         type: MI_INPUT_TYPES.size,
         action:actionTypes.BLOCK_FONT_SIZE_SET});
@@ -139,16 +167,27 @@ function Sidemenu ({store}) {
         action:actionTypes.BLOCK_FONT_COLOR_SET});
       genBlockMI({value: BLOCK_STYLE_NAMES.fontBold,
         type: MI_INPUT_TYPES.selector,
-        action:actionTypes.BLOCK_FONT_BOLD_SET});
+        action:actionTypes.BLOCK_FONT_BOLD_SET,
+        options: BLOCK_STYLE_SETTINGS[BLOCK_STYLE_NAMES.fontBold].selectorOptions
+      });
       genBlockMI({value: BLOCK_STYLE_NAMES.fontItalic,
         type: MI_INPUT_TYPES.selector,
-        action:actionTypes.BLOCK_FONT_ITALIC_SET});
+        action:actionTypes.BLOCK_FONT_ITALIC_SET,
+        options: BLOCK_STYLE_SETTINGS[BLOCK_STYLE_NAMES.fontItalic].selectorOptions
+      });
+      genBlockMI({value: BLOCK_STYLE_NAMES.fontUnderline,
+        type: MI_INPUT_TYPES.selector,
+        action:actionTypes.BLOCK_FONT_UNDERLINE_SET,
+        options: BLOCK_STYLE_SETTINGS[BLOCK_STYLE_NAMES.fontUnderline].selectorOptions
+      });
       
       if(!blockSelectedChildrenList.length) {
         ret.push(<div className='spacer' key='spacerContent' >{t("Content")}</div>);
         genBlockMI({value: "valueType",
           type: MI_INPUT_TYPES.selector,
-          action:actionTypes.BLOCK_VALUE_TYPE_SET});
+          action:actionTypes.BLOCK_VALUE_TYPE_SET,
+          options:Object.values(BLOCK_VALUE_TYPE_OPTIONS)
+        });
         if(blockSelectedObject.valueType !== "copied") { //if block is not copying from another
           if(blockSelectedObject.valueType !== "fixed") { //if value is variable
 
@@ -272,7 +311,7 @@ function Sidemenu ({store}) {
   return (
     <div className='Sidemenu'>
       <div className='tabs'>
-        {stateNow.app.tabSelectedOptions.map(([tabTitle,
+        {tabOptions.map(([tabTitle,
           tabValue], i) => {
           return <Tab tabIndex={i + 1} key={tabValue} store={store} tabName={tabTitle} tabValue={tabValue}/>;
         })}

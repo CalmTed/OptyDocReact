@@ -1,8 +1,8 @@
-import actionTypes from "../reducers/actionTypes";
 import React from "react";
 import Block from "./Block";
 import t from "../local.ts";
-import {templateSizes, TAB_NAMES} from "../constants/constants";
+import actionTypes from "../constants/actionTypes";
+import {templateSizes, TAB_NAMES} from "../constants/app";
 
 function Stack ({store}) {
   const stateNow = store.getState();

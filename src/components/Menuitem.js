@@ -1,8 +1,9 @@
 import React from "react";
 import Icon from "./Icon";
-import actionTypes from "../reducers/actionTypes";
+import actionTypes from "../constants/actionTypes";
 import t from "../local.ts";
-import {TAB_NAMES, MI_INPUT_TYPES} from "../constants/constants";
+import {TAB_NAMES, MI_INPUT_TYPES} from "../constants/app";
+import {exportCSVFile, importCSVFile} from "../utils/handleCSVFile";
 
 function Menuitem ({store, value, type, action, placeholder, fileType, columnSelected, icon, primary, title, options, dataList}) {
   const stateNow = store.getState();
@@ -28,109 +29,23 @@ function Menuitem ({store, value, type, action, placeholder, fileType, columnSel
     }
     return ret;
   };
-  const compareArr = (a, b) => {
-    if(!(a && b)) {
-      return false;
-    }
-    let isDifferent = true;
-    if(a.length !== b.length) {
-      return false;
-    }
-    a.forEach((av, ai) => {
-      b.forEach((bv, bi) => {
-        if(ai === bi && av !== bv) {
-          isDifferent = false;
-        }
-      });
-    });
-    return isDifferent;
-  };
-  const uploadFile = (e, fileType, actionType) => {
-    let file = e.target.files[0];
-    let fileText = "";
-    if(file.name.substr(-(fileType.length), fileType.length) === fileType) {
-      //geting text value of csv file
-      let fr = new FileReader();
-      fr.onload = function () {
-        //parsing csv
-        fileText = fr.result;
-        function parseCSV (str) {
-          var arr = [];
-          var quote = false;
-          for (var row = 0, col = 0, c = 0; c < str.length; c++) {
-            var cc = str[c], nc = str[c + 1];
-            arr[row] = arr[row] || [];
-            arr[row][col] = arr[row][col] || ""; 
-            if (cc === "\"" && quote && nc === "\"") { arr[row][col] += cc; ++c; continue; }
-            if (cc === "\"") { quote = !quote; continue; }
-            if (cc === "," && !quote) { ++col; continue; }
-            if (cc === "\r" && nc === "\n" && !quote) { ++row; col = 0; ++c; continue; }
-            if (cc === "\n" && !quote) { ++row; col = 0; continue; }
-            if (cc === "\r" && !quote) { ++row; col = 0; continue; }
-            arr[row][col] += cc;
-          }
-          return arr;
-        }
-        let formatedTableData = parseCSV(fileText);
-        //read first line
-                
-        //check length of all rows
-        if(compareArr(formatedTableData[0], stateNow.copies.columns.map(col => { return col.title; }))) {
-          let valid = true;
-          formatedTableData.forEach((row) => {
-            if(row.length !== formatedTableData[0].length) {
-              valid = false;
-            }
-          });
-          if(valid) {
-            store.dispatch({type:actionType,
-              payload:formatedTableData});
-          }else{
-            console.log("invalid table");
-          }
-        }else{
-          console.log("wrong size");
-        }
-      };                        
-      fr.readAsText(file);
-    }
-  };
   const handleMIchange = (e) => {
     if(valueMI[0] === "customAction") {
       switch(valueMI[1]) {
       case "uploadCSV":
-        uploadFile(e, fileType, actionTypes.COPIES_DATA_SET);
+        importCSVFile(e, fileType, stateNow.copies.columns, (formatedTableData) => {
+          store.dispatch({type:actionTypes.COPIES_DATA_SET,
+            payload:formatedTableData});
+        });
         break;
       case "downloadCSV":
-        let saveTable = (textToSave, fileName) => {
-          let link = document.createElement("a");
-          document.body.appendChild(link);
-          link.style = "display: none";
-          let url = "data:text/csv;charset=utf-8,%EF%BB%BF" + encodeURI(textToSave);
-          link.href = url;
-          link.download = fileName;
-          link.click();
-          window.URL.revokeObjectURL(url);
-        };
-        let columnsTitles = stateNow.copies.columns.map(col => {
-          return col.title;
-        });
-        let columnsRows = stateNow.copies.rows[0];
-        let tableToSave = columnsTitles;
-        if(columnsTitles.length, columnsRows.length) {
-          //safe saving cells with commas
-          tableToSave = tableToSave.concat(stateNow.copies.rows.map(row => {
-            let rowToSave = row.map(cell => {
-              let cellToSave = cell;
-              if(cell.includes(",")) {
-                cellToSave = `"${cell}"`;
-              }
-              return cellToSave;
-            }).join(",");
-            return rowToSave;
-          })).join("\r\n");
-        }
-        saveTable(tableToSave, stateNow.template.name + "_table.csv");
+        exportCSVFile(
+          stateNow.copies.columns.map(col => {
+            return col.title;
+          }),
+          stateNow.copies.rows,
+          stateNow.template.name
+        );
         break;
       case "addCopyRow":
         let newRowToAdd = () => {
@@ -307,7 +222,6 @@ function Menuitem ({store, value, type, action, placeholder, fileType, columnSel
       return ret;
     };
     const getDataListOptions = (dataList = []) => {
-      
       const dataListOptions = dataList.map(option => <option key={`${option}_option`} value={option}></option>);
       return dataListOptions;
     };
@@ -330,24 +244,7 @@ function Menuitem ({store, value, type, action, placeholder, fileType, columnSel
       ret.push(<input key={valueMI[1] + "ColorInput"} className='color' type='color' value={getInputValue()} onChange={handleMIchange} placeholder={placeholder}  title={t(valueMI[1])}/>);
       break;
     case MI_INPUT_TYPES.selector:
-                
-      let selectorOptions = [["",
-        ""]];
-      let miOptionsName = valueMI[1] + "Options";
-      let targetObject = stateNow[valueMI[0]];
-      if(valueMI[0] === "selectedBlock") {
-        let selectedBlockID = stateNow.app.blockSelected;
-        targetObject = stateNow.template.children.filter((b) => { return b.uuid === Number(selectedBlockID); })[0];
-      }
-      if(typeof options === "undefined" || !options.length) {
-        if(targetObject[miOptionsName]) {
-          selectorOptions = targetObject[miOptionsName];
-        }else if(targetObject.style[miOptionsName]) {
-          selectorOptions = targetObject.style[miOptionsName];
-        }
-      }else{
-        selectorOptions = options;
-      }
+      const selectorOptions = options || ["", ""];
       let selectorOptionsHTML = selectorOptions.map(([title,
         optionValue], index) => {
         //check if we need to translate

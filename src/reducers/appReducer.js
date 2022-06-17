@@ -1,20 +1,13 @@
-import actionTypes from "./actionTypes";
 import langWords from "../langWords";
-import {colorModes, TAB_NAMES, tabOptions} from "../constants/constants"; 
+import actionTypes from "../constants/actionTypes";
+import {colorModes, tabOptions} from "../constants/app"; 
+import {initialValuesApp} from "../constants/initialValues";
 
 const getinitialState = () => {
   if(!window.localStorage.getItem("ODStore")) {
     return  {
-      name:"OptyDoc",
-      version:"0.0.1",
-      colorMode:colorModes[0] || "light",
-      colorModeOptions:colorModes || [],
-      languageCode:"en",
       languageWords:langWords(),
-      tabSelected:TAB_NAMES.edit,
-      tabSelectedOptions:tabOptions,
-      blockSelected:"",
-      copySelected:""
+      ...initialValuesApp
     };  
   }else {
     console.debug("Getting app data from localstorage");

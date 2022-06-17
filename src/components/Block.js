@@ -1,6 +1,6 @@
 import React from "react";
-import actionTypes from "../reducers/actionTypes";
-import {TAB_NAMES} from "../constants/constants";
+import actionTypes from "../constants/actionTypes";
+import {TAB_NAMES} from "../constants/app";
 
 function Block ({store, blockData, copyIndex}) {
   const stateNow = store.getState();
@@ -17,7 +17,7 @@ function Block ({store, blockData, copyIndex}) {
         if(typeof innerText === "undefined") {
           return formatedInnerText;
         }
-        if(innerText.indexOf("\n") === -1) {
+        if(!innerText.includes("\n")) {
           formatedInnerText.push(innerText);
         }else{
           const getPostfix = (copyIndex) => {

@@ -77,6 +77,8 @@ export default function langWords () {
       "Not italic":"Прямий",
       "Italic":"Нахилений",
       "fontItalic":"Нахиленість текст",
+      "Non underline":"Непідвреслений",
+      "Underline":"Підвреслений",
       "Fixed":"Статична",
       "Variable":"Змінна",
       "Selector":"Вибір",

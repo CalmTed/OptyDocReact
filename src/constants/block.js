@@ -1,4 +1,4 @@
-import {MI_INPUT_TYPES} from "./constants";
+import {MI_INPUT_TYPES} from "./app";
 
 export const BLOCK_STYLE_NAMES = {
   width:"width",
@@ -177,6 +177,17 @@ export const BLOCK_STYLE_SETTINGS = {
     type:MI_INPUT_TYPES.textarea,
     initialValue:""
   }
+};
+
+export const BLOCK_VALUE_TYPE_OPTIONS = {
+  fixed: ["Fixed",
+    "fixed"],
+  variable:["Variable",
+    "variable"],
+  selector: ["Selector",
+    "selector"],
+  copied: ["Copy from",
+    "copied"]
 };
 
 export const getBlockSettings = (blockName) => {

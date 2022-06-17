@@ -1,5 +1,5 @@
 import React from "react";
-import actionTypes from "../reducers/actionTypes";
+import actionTypes from "../constants/actionTypes";
 import t from "../local.ts";
 function Tab ({store, tabValue, tabIndex, tabName}) {
   const stateNow = store.getState();

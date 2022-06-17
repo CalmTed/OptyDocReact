@@ -1,6 +1,6 @@
 import React from "react";
 import Topbutton from "./Topbutton";
-import {TAB_NAMES} from "../constants/constants";
+import {TAB_NAMES} from "../constants/app";
 
 function Topmenu ({store}) {
   const stateNow = store.getState();

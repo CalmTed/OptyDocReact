@@ -1,4 +1,4 @@
-import actionTypes from "./actionTypes";
+import actionTypes from "../constants/actionTypes";
 const getinitialState = () => {
   if(!window.localStorage.getItem("ODStore")) {
     return  {
