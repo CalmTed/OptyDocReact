@@ -137,7 +137,7 @@ function Sidemenu ({store}) {
         genBlockMI({value: BLOCK_STYLE_NAMES.alignHorizontal,
           type: MI_INPUT_TYPES.selector,
           action:actionTypes.BLOCK_ALIGN_HORIZONTAL_SET,
-          options: BLOCK_STYLE_SETTINGS[BLOCK_STYLE_NAMES.alignVertical].selectorOptions
+          options: BLOCK_STYLE_SETTINGS[BLOCK_STYLE_NAMES.alignHorizontal].selectorOptions
         });
         ret.push(<div className='spacer' key='spacerMargin' >{t("Margin")}</div>);
         genBlockMI({value: BLOCK_STYLE_NAMES.marginTop,
@@ -253,9 +253,9 @@ function Sidemenu ({store}) {
           stateNow.copies.columns.forEach((col) => {
             const getMiType  = (colType) => {
               switch(colType) {
-              case "variable":
+              case BLOCK_VALUE_TYPE_OPTIONS.variable[1]:
                 return MI_INPUT_TYPES.text;
-              case "selector":
+              case BLOCK_VALUE_TYPE_OPTIONS.selector[1]:
                 return MI_INPUT_TYPES.selector;
               default:
                 return MI_INPUT_TYPES.text;
@@ -268,7 +268,8 @@ function Sidemenu ({store}) {
             };
             const getDataList = () => {
               const colId = stateNow.copies.columns.indexOf(stateNow.copies.columns.find(c => Number(c.target) === Number(col.target)));
-              const datalist = stateNow.copies.rows.map(row => row[colId]).filter((value, index, self) => { return (self.indexOf(value) === index && value.length > 0); });
+              let datalist = [];
+              datalist = stateNow.copies.rows.map(row => row[colId]).filter((value, index, self) => { return (self.indexOf(value) === index && value?.length > 0) || false; });
               return datalist;
             };
             ret.push(<div className='spacer' key={"spacerInput" + col.target} >{col.title}</div>);

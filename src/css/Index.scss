@@ -98,17 +98,10 @@ border: 1px solid transparent;
             margin-left: #{$sideMenuItemsMargin};
             color: var(--secondary-color);
             flex-wrap: wrap;
-            .blockName{
+            .blockName,.blockParent,.blockNeigbor,.blockChildren{
                 width: 100%;
-            }
-            .blockParent{
-                width: 100%;
-            }
-            .blockNeigbor{
-                width: 100%;
-            }
-            .blockChildren{
-                width: 100%;
+                display: flex;
+                flex-wrap: wrap;
             }
             .blockLink{
                 text-decoration: underline;

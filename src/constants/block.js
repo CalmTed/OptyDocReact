@@ -71,11 +71,11 @@ export const BLOCK_STYLE_SETTINGS = {
     selectorOptions:[
       ["Inherit",
         "inherit"],
-      ["Top",
+      ["Left",
         "start"],
       ["Center",
         "center"],
-      ["Bottom",
+      ["Right",
         "end"],
       ["Space around",
         "space-around"],

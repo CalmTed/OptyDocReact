@@ -4,6 +4,7 @@ import actionTypes from "../constants/actionTypes";
 import t from "../local.ts";
 import {TAB_NAMES, MI_INPUT_TYPES} from "../constants/app";
 import {exportCSVFile, importCSVFile} from "../utils/handleCSVFile";
+import {recreateCopiesTitles} from "../utils/handleCopyesTable";
 
 function Menuitem ({store, value, type, action, placeholder, fileType, columnSelected, icon, primary, title, options, dataList}) {
   const stateNow = store.getState();
@@ -29,7 +30,7 @@ function Menuitem ({store, value, type, action, placeholder, fileType, columnSel
     }
     return ret;
   };
-  const handleMIchange = (e) => {
+  const handleMIchange = async (e) => {
     if(valueMI[0] === "customAction") {
       switch(valueMI[1]) {
       case "uploadCSV":
@@ -43,7 +44,7 @@ function Menuitem ({store, value, type, action, placeholder, fileType, columnSel
           stateNow.copies.columns.map(col => {
             return col.title;
           }),
-          stateNow.copies.rows,
+          (stateNow.copies.rows.length ? stateNow.copies.rows : [""]),
           stateNow.template.name
         );
         break;
@@ -76,12 +77,12 @@ function Menuitem ({store, value, type, action, placeholder, fileType, columnSel
       //manual action handling
       if(action) {
         if(stateNow.app.tabSelected === TAB_NAMES.edit) {
-          store.dispatch({
+          await store.dispatch({
             type:action,
             payload:e.target.value,
             blockSelected:stateNow.app.blockSelected});
         }else if(stateNow.app.tabSelected === TAB_NAMES.copy) {
-          store.dispatch({
+          await store.dispatch({
             type:action,
             payload:e.target.value,
             copySelected:stateNow.app.copySelected,
@@ -93,43 +94,7 @@ function Menuitem ({store, value, type, action, placeholder, fileType, columnSel
           if(
             ((action === actionTypes.BLOCK_INNER_TEXT_SET) || (action === actionTypes.BLOCK_VALUE_TYPE_SET) || (action === actionTypes.BLOCK_VARIABLE_TITLE_SET))
           ) {
-            const findVariableChildren = (children, parentID, returnList = []) => {
-              children.forEach(rootChild => {
-                if (rootChild.parentID === parentID) {
-                  const isVariable = (["variable", "selector"].includes(rootChild.valueType));
-                  const hasChildren = typeof children.find(child => child.parentID === rootChild.uuid) !== "undefined";
-                  if (!hasChildren && isVariable) {
-                    returnList.push(rootChild);
-                  }else{
-                    returnList = findVariableChildren(children, rootChild.uuid, returnList);
-                  }
-                }
-              });
-              return returnList;
-            };
-            const variablesListObjects = findVariableChildren(stateNow.template.children, "");
-            const columnsObject = (variablesListObjects) => {
-              let ret = [];
-              variablesListObjects.forEach(obj => {
-                let type = "variable";
-                let options = [""];
-                if(obj.valueType === "selector") {
-                  type = obj.valueType;
-                  options = obj.innerText.split("\n");
-                }
-                ret.push({
-                  target:obj.uuid + "",
-                  title:obj.variableTitle,
-                  type:type,
-                  options:options
-                });
-              });
-                            
-              return ret;
-            };
-            store.dispatch({type:actionTypes.COPIES_COLUMNS_SET,
-              payload:columnsObject(variablesListObjects)});
-            //dispatch an action
+            recreateCopiesTitles(store, actionTypes);
           }
         }
         //calculate how much there might be blocks

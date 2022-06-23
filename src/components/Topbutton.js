@@ -3,6 +3,7 @@ import Icon from "./Icon";
 import t from "../local.ts";
 import actionTypes from "../constants/actionTypes";
 import {exportTemplateFile, importTemplateFile} from "../utils/handleTemplateFile";
+import {recreateCopiesTitles} from "../utils/handleCopyesTable";
 
 function Topbutton ({disabled = false, name, store}) {
   const stateNow = store.getState();
@@ -83,10 +84,10 @@ function Topbutton ({disabled = false, name, store}) {
           return false;
         }
       }
-      importTemplateFile(e.target.files[0], stateNow.app.version, (templateData) => {
-        store.dispatch({type:actionTypes.TEMPLATE_OPEN_TEMPLATE,
+      importTemplateFile(e.target.files[0], stateNow.app.version, async (templateData) => {
+        await store.dispatch({type:actionTypes.TEMPLATE_OPEN_TEMPLATE,
           payload:templateData});
-        
+        recreateCopiesTitles(store, actionTypes);
       }, (err) => {
         console.warn(err);
       });

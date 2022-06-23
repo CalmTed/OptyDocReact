@@ -28,9 +28,9 @@ export const exportCSVFile = (columnsTitles, columnsRows, templateName) => {
     window.URL.revokeObjectURL(url);
   };
   if(columnsTitles.length && columnsRows[0].length) {
-    columnsTitles = columnsTitles.concat(columnsRows.map(row => {
+    columnsTitles = [columnsTitles].concat(columnsRows.map(row => {
       const rowToSave = row.map(cell => {
-        let cellToSave = cell;
+        let cellToSave = cell.replace(/\n/g, "%2F");
         if(cell.includes(",")) {
           cellToSave = `"${cell}"`;
         }
@@ -57,7 +57,7 @@ export const importCSVFile = (e, fileType, copiesColumns, callBack = (tableData)
         for (var row = 0, col = 0, c = 0; c < str.length; c++) {
           var cc = str[c], nc = str[c + 1];
           arr[row] = arr[row] || [];
-          arr[row][col] = arr[row][col] || ""; 
+          arr[row][col] = arr[row][col]?.replace(/(%2F)/g, "\n") || "";
           if (cc === "\"" && quote && nc === "\"") { arr[row][col] += cc; ++c; continue; }
           if (cc === "\"") { quote = !quote; continue; }
           if (cc === "," && !quote) { ++col; continue; }
@@ -69,7 +69,6 @@ export const importCSVFile = (e, fileType, copiesColumns, callBack = (tableData)
         return arr;
       }
       let formatedTableData = parseCSV(fileText);
-      //read first line
               
       //check length of all rows
       if(compareArr(formatedTableData[0], copiesColumns.map(col => { return col.title; }))) {
@@ -82,9 +81,11 @@ export const importCSVFile = (e, fileType, copiesColumns, callBack = (tableData)
         if(valid) {
           callBack(formatedTableData);
         }else{
+          alert("invalid table | неправильна таблиця");
           console.log("invalid table");
         }
       }else{
+        alert("wrong table size | неправильний розмір таблиці");
         console.log("wrong size");
       }
     };                        
