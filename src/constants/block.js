@@ -20,6 +20,16 @@ export const BLOCK_STYLE_NAMES = {
   customStyle:"customStyle"
 };
 
+export const BLOCK_INHERIT = "inherit";
+export const BLOCK_NO_PARENT = null;
+
+export const BLOCK_CONTENT_TYPES = {
+  fixed: "fixed1",
+  variable: "variable1",
+  selector: "selector1",
+  copied: "copied1"
+};
+
 export const BLOCK_STYLE_SETTINGS = {
   [BLOCK_STYLE_NAMES.width] : {
     inputType: MI_INPUT_TYPES.size,
@@ -180,14 +190,22 @@ export const BLOCK_STYLE_SETTINGS = {
 };
 
 export const BLOCK_VALUE_TYPE_OPTIONS = {
-  fixed: ["Fixed",
-    "fixed"],
-  variable:["Variable",
-    "variable"],
-  selector: ["Selector",
-    "selector"],
-  copied: ["Copy from",
-    "copied"]
+  [BLOCK_CONTENT_TYPES.fixed]: [
+    "Fixed",
+    BLOCK_CONTENT_TYPES.fixed
+  ],
+  [BLOCK_CONTENT_TYPES.variable]:[
+    "Variable",
+    BLOCK_CONTENT_TYPES.variable
+  ],
+  [BLOCK_CONTENT_TYPES.selector]: [
+    "Selector",  
+    BLOCK_CONTENT_TYPES.selector
+  ],
+  [BLOCK_CONTENT_TYPES.copied]: [
+    "Copy from",  
+    BLOCK_CONTENT_TYPES.copied
+  ]
 };
 
 export const getBlockSettings = (blockName) => {

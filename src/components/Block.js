@@ -1,6 +1,7 @@
 import React from "react";
 import actionTypes from "../constants/actionTypes";
-import {TAB_NAMES} from "../constants/app";
+import {TAB_NAMES, TAB_INDEXES} from "../constants/app";
+import {BLOCK_INHERIT, BLOCK_CONTENT_TYPES, BLOCK_NO_PARENT} from "../constants/block";
 
 function Block ({store, blockData, copyIndex}) {
   const stateNow = store.getState();
@@ -23,7 +24,7 @@ function Block ({store, blockData, copyIndex}) {
           const getPostfix = (copyIndex) => {
             return typeof copyIndex !== "undefined" ? "_" + copyIndex : "_p";
           };
-          if(blockData.valueType === "selector") {
+          if(blockData.valueType === BLOCK_CONTENT_TYPES.selector) {
             formatedInnerText.push(<p key={blockData.uuid} id={blockData.uuid + getPostfix(copyIndex)}>{innerText.split("\n")[0]}</p>);
           }else{
             innerText.split("\n").forEach((_line, i) => {
@@ -51,12 +52,12 @@ function Block ({store, blockData, copyIndex}) {
       };
       let getReferenceObject = (stateNow, copyChannel) => {
         let referenceObject = stateNow.template.children.filter(ch => {
-          return (ch.valueType !== "copied") && (ch.copyChannel + "" === copyChannel + "");
+          return (ch.valueType !== BLOCK_CONTENT_TYPES.copied) && (ch.copyChannel + "" === copyChannel + "");
         })[0];//if there would be more then one origin object -> select first one
         return referenceObject;
       };
       //if block is copying from another channel
-      let isCopyLinked = blockData.valueType === "copied";
+      let isCopyLinked = blockData.valueType === BLOCK_CONTENT_TYPES.copied;
       //if block is a copy of template
       let isCopyIndexed = typeof copyIndex !== "undefined";
       //                    Edit tab           Copy tab
@@ -70,7 +71,7 @@ function Block ({store, blockData, copyIndex}) {
         }
         if(isCopyIndexed) { //4
                     
-          if(referenceObject.valueType !== "fixed") {
+          if(referenceObject.valueType !== BLOCK_CONTENT_TYPES.fixed) {
             ret = [...formatInnerText(getTextFromCopyRows(stateNow, referenceObject.uuid, copyIndex))];
           }else{
             ret = [...formatInnerText(referenceObject.innerText)];
@@ -84,7 +85,7 @@ function Block ({store, blockData, copyIndex}) {
           //TODO is static or variable?
           //add selector if just have options
           //add input(?) if text
-          if(blockData.valueType !== "fixed") {
+          if(blockData.valueType !== BLOCK_CONTENT_TYPES.fixed) {
             ret = [...formatInnerText(getTextFromCopyRows(stateNow, blockData.uuid, copyIndex))];
           }else{
             ret = [...formatInnerText(blockData.innerText)];
@@ -115,7 +116,7 @@ function Block ({store, blockData, copyIndex}) {
       blockOutline = "var(--selected-border)";
     }
     //showing selected copy
-    if(blockData.parentID === "" && copyIndex + "" === appState.copySelected && appState.tabSelected === TAB_NAMES.copy) {
+    if(blockData.parentID === BLOCK_NO_PARENT && copyIndex + "" === appState.copySelected + "" && appState.tabSelected === TAB_NAMES.copy) {
       blockOutline = "var(--selected-border)";
     }
     const checkForZoom = (_val) => {
@@ -157,7 +158,7 @@ function Block ({store, blockData, copyIndex}) {
     };
     Object.entries(stylesToCheck).forEach(s => {      
       //no need to call all if there is inherit or indeclared
-      if(!["inherit",
+      if(![BLOCK_INHERIT,
         "calc( auto * var(--zoom) )",
         "calc( 0mm * var(--zoom) )"].includes(s[1])) {
         constructedStyle = {...constructedStyle,
@@ -215,7 +216,7 @@ function Block ({store, blockData, copyIndex}) {
       style={getStyle(blockData, stateNow.app, copyIndex, TAB_NAMES)}
       onClick={handleClick}
       onKeyPress={handleKeyPress}
-      tabIndex='10'
+      tabIndex={TAB_INDEXES.block}
       title={getTitle(tabSelected, TAB_NAMES, copyIndex, blockData.humanfriendlyID)}
     >
       {getBlocks(store, blockData, copyIndex)}

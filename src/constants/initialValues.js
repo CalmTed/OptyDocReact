@@ -1,5 +1,5 @@
 
-import {colorModes, TAB_NAMES} from "../constants/app"; 
+import {colorModes, NO_BLOCK_SELECTED, NO_COPY_SELECTED, TAB_NAMES} from "../constants/app"; 
 
 export const initialValuesApp = {
   colorMode:colorModes[0] || "light",
@@ -7,8 +7,8 @@ export const initialValuesApp = {
   name:"OptyDoc",
   version:"0.0.1",
   languageCode:"en",
-  blockSelected:"", //TODO make null and constant
-  copySelected:""
+  blockSelected:NO_BLOCK_SELECTED,
+  copySelected:NO_COPY_SELECTED
 };
 
 export const initialValuesTemplate = {

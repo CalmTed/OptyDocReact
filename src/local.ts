@@ -10,7 +10,7 @@ export default function t (a:string) {
     }else if (/(\d{1,}$)|(^\d{1,}$)/g.test(a)) {
       return a;
     }else{
-      console.log(`'${a}':'',`);
+      console.log(`"${a}":"",`);
       return a;
     }
   }

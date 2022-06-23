@@ -137,6 +137,9 @@ border: 1px solid transparent;
                     outline-color: var(--main-color);
                     outline-width: 1px;
                 }
+                &.inherited:not(:focus){
+                    opacity: 0.5;
+                }
             }
 
             input.size{

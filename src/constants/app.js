@@ -44,3 +44,13 @@ export const MI_INPUT_TYPES = {
   file:"file",
   button:"button"
 };
+
+export const NO_BLOCK_SELECTED = null;
+export const NO_COPY_SELECTED = null;
+
+export const TAB_INDEXES = {
+  tabs: 1,
+  topButton:7,
+  stack: 8,
+  block: 10
+};

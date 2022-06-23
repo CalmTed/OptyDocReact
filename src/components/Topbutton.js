@@ -4,13 +4,14 @@ import t from "../local.ts";
 import actionTypes from "../constants/actionTypes";
 import {exportTemplateFile, importTemplateFile} from "../utils/handleTemplateFile";
 import {recreateCopiesTitles} from "../utils/handleCopyesTable";
+import {NO_BLOCK_SELECTED, TAB_INDEXES} from "../constants/app";
 
 function Topbutton ({disabled = false, name, store}) {
   const stateNow = store.getState();
   const isDisabled = (name) => {
     switch(name) {
     case "removeBlock":
-      if(stateNow.app.blockSelected === "") {
+      if(stateNow.app.blockSelected === NO_BLOCK_SELECTED) {
         disabled = true;
       }
       break;
@@ -39,8 +40,10 @@ function Topbutton ({disabled = false, name, store}) {
         blockSelected:blockSelected});
       break;
     case "removeBlock":
-      store.dispatch({type:actionTypes.SELECTEDBLOCK_SET,
-        payload:""});
+      store.dispatch({
+        type:actionTypes.SELECTEDBLOCK_SET,
+        payload:NO_BLOCK_SELECTED
+      });
       store.dispatch({type:actionTypes.TEMPLATE_BLOCK_REMOVE,
         payload:"",
         blockSelected:blockSelected});
@@ -54,7 +57,7 @@ function Topbutton ({disabled = false, name, store}) {
         store.dispatch({type:actionTypes.COPIES_DATA_SET,
           payload:[]});
         store.dispatch({type:actionTypes.SELECTEDBLOCK_SET,
-          payload:""});
+          payload:NO_BLOCK_SELECTED});
       };
       if(stateNow.template.dateEdited) {
         if(confirm(t("Delete existing?"))) {
@@ -128,7 +131,7 @@ function Topbutton ({disabled = false, name, store}) {
     return content;
   };
   return (
-    <div className={"Topbutton" + " tbtn-" + name + " " + isDisabled(name, store)} tabIndex={!disabled ? "7" : ""} onClick={handleClick} onKeyPress={handleKeyPress} title={t(name)}>
+    <div className={"Topbutton" + " tbtn-" + name + " " + isDisabled(name, store)} tabIndex={!disabled ? TAB_INDEXES.topButton : ""} onClick={handleClick} onKeyPress={handleKeyPress} title={t(name)}>
       {getContent(name, stateNow, store)}
     </div>
   );

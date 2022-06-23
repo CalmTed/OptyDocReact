@@ -1,8 +1,9 @@
 import React from "react";
 import Icon from "./Icon";
-import actionTypes from "../constants/actionTypes";
 import t from "../local.ts";
-import {TAB_NAMES, MI_INPUT_TYPES} from "../constants/app";
+import actionTypes from "../constants/actionTypes";
+import {TAB_NAMES, MI_INPUT_TYPES, NO_BLOCK_SELECTED} from "../constants/app";
+import {BLOCK_INHERIT, BLOCK_CONTENT_TYPES, BLOCK_NO_PARENT} from "../constants/block";
 import {exportCSVFile, importCSVFile} from "../utils/handleCSVFile";
 import {recreateCopiesTitles} from "../utils/handleCopyesTable";
 
@@ -51,9 +52,9 @@ function Menuitem ({store, value, type, action, placeholder, fileType, columnSel
       case "addCopyRow":
         let newRowToAdd = () => {
           return stateNow.copies.columns.map((col) => {
-            if(col.type === "selector") {
+            if(col.type === BLOCK_CONTENT_TYPES.selector) {
               return col.options[0];
-            }else if (col.type === "variable") {
+            }else if (col.type === BLOCK_CONTENT_TYPES.variable) {
               return stateNow.template.children.filter(ch => { return ch.uuid === Number(col.target); })[0].innerText;
             }else{
               return col.title;
@@ -89,7 +90,7 @@ function Menuitem ({store, value, type, action, placeholder, fileType, columnSel
             columnSelected:columnSelected});
         }
         //changing selectedBlock
-        if(stateNow.app.blockSelected !== "") {
+        if(stateNow.app.blockSelected !== NO_BLOCK_SELECTED) {
           //editing copies columns table
           if(
             ((action === actionTypes.BLOCK_INNER_TEXT_SET) || (action === actionTypes.BLOCK_VALUE_TYPE_SET) || (action === actionTypes.BLOCK_VARIABLE_TITLE_SET))
@@ -112,7 +113,7 @@ function Menuitem ({store, value, type, action, placeholder, fileType, columnSel
           setTimeout(() => {
             let farthestHeight = 0;
             let farthestWidth = 0;
-            stateNow.template.children.filter(ch => { return ch.parentID === ""; }).forEach(rootChild => {
+            stateNow.template.children.filter(ch => { return ch.parentID === BLOCK_NO_PARENT; }).forEach(rootChild => {
               let childDomObj = document.getElementById(rootChild.uuid);
               // console.log(childDomObj,childDomObj.clientWidth,childDomObj.offsetLeft,childDomObj.clientWidth+childDomObj.offsetLeft)
               // console.log(childDomObj,childDomObj.clientHeight,childDomObj.offsetTop,childDomObj.clientHeight+childDomObj.offsetTop)
@@ -155,9 +156,10 @@ function Menuitem ({store, value, type, action, placeholder, fileType, columnSel
   };
   const getContent = () => {
     let ret = [];
-
     let getInputValue = () => {
       let ret = "";
+      let isInherited = false;
+      
       if(valueMI[0] === "selectedBlock") {
         //search for needed block
         let selectedBlockID = stateNow.app.blockSelected;
@@ -166,6 +168,26 @@ function Menuitem ({store, value, type, action, placeholder, fileType, columnSel
           ret = selectedBlockObject[valueMI[1]];
         }else if(selectedBlockObject.style[valueMI[1]]) {
           ret = selectedBlockObject.style[valueMI[1]];
+        }
+        const lookForInheritValue = (uuid, property) => {
+          let parentObject = stateNow.template.children.find((b) => { return b.uuid === Number(uuid); });
+          if(!parentObject) {
+            return false;
+          }
+          if(parentObject.style[property] === BLOCK_INHERIT) {
+            if(parentObject.parentID !== BLOCK_NO_PARENT) {
+              return lookForInheritValue(parentObject.parentID, property);
+            }else{
+              return false;
+            }
+          }else{
+            return parentObject.style[property];
+          }
+        };
+        if (ret === BLOCK_INHERIT) {
+          const nearestParent = lookForInheritValue(selectedBlockObject.parentID, valueMI[1]);
+          isInherited = !!nearestParent;
+          ret = nearestParent ? nearestParent : ret;
         }
       }
       if(valueMI[0] === "selectedCopy") {
@@ -178,35 +200,38 @@ function Menuitem ({store, value, type, action, placeholder, fileType, columnSel
         if(typeof stateNow.copies.rows[stateNow.app.copySelected] !== "undefined" && typeof stateNow.copies.rows[stateNow.app.copySelected][selectedColumnID] !== "undefined") {
           ret = stateNow.copies.rows[stateNow.app.copySelected][selectedColumnID];
         }else{
+          isInherited = true;
           ret = stateNow.template.children.find((b) => { return Number(b.uuid) === Number(columnSelected); }).innerText;
         }
       }
       if(stateNow[valueMI[0]]) {
         ret =  stateNow[valueMI[0]][valueMI[1]];
       }
-      return ret;
+      return {
+        value: ret,
+        isInherited
+      };
     };
     const getDataListOptions = (dataList = []) => {
       const dataListOptions = dataList.map(option => <option key={`${option}_option`} value={option}></option>);
       return dataListOptions;
     };
+    const inputValue = getInputValue() || [];
     switch(type) {
     case MI_INPUT_TYPES.text:
       ret.push(<div key={valueMI[1] + "textInputWrapper"} >
-        <input key={valueMI[1] + "TextInput"} list={valueMI[1] + "TextInputList"} value={getInputValue()} onChange={handleMIchange} placeholder={placeholder} title={t(valueMI[1])}/>
+        <input key={valueMI[1] + "TextInput"} className={inputValue.isInherited ? "inherited" : ""} list={valueMI[1] + "TextInputList"} value={inputValue.value} onChange={handleMIchange} placeholder={placeholder} title={t(valueMI[1])}/>
         <datalist key= {valueMI[1] + "TextInputListKey"} id={valueMI[1] + "TextInputList"}>{getDataListOptions(dataList)}</datalist>
       </div>);
-      // ret.push(<textarea key={target[1]} className='text' onChange={handleMIchange} placeholder={placeholder} title={target[1]}>{inputValue()}</textarea>);
       break;
     case MI_INPUT_TYPES.textarea:
-      ret.push(<textarea key={valueMI[1] + "TextareaInput"} className='textarea' value={getInputValue()} onChange={handleMIchange} placeholder={placeholder} title={t(valueMI[1])}></textarea>);
-      // ret.push(<input key={target[1]} value={inputValue()} onChange={handleMIchange} placeholder={placeholder} title={target[1]}/>);
+      ret.push(<textarea key={valueMI[1] + "TextareaInput"} className={`textarea${inputValue.isInherited ? " inherited" : ""}`} value={inputValue.value} onChange={handleMIchange} placeholder={placeholder} title={t(valueMI[1])}></textarea>);
       break;
     case MI_INPUT_TYPES.size:
-      ret.push(<input key={valueMI[1] + "SizeInput"} className='size' value={getInputValue()} onChange={handleMIchange} placeholder={placeholder}  title={t(valueMI[1])}/>);
+      ret.push(<input key={valueMI[1] + "SizeInput"} className={`size${inputValue.isInherited ? " inherited" : ""}`} value={inputValue.value} onChange={handleMIchange} placeholder={placeholder}  title={t(valueMI[1])}/>);
       break;
     case MI_INPUT_TYPES.color:
-      ret.push(<input key={valueMI[1] + "ColorInput"} className='color' type='color' value={getInputValue()} onChange={handleMIchange} placeholder={placeholder}  title={t(valueMI[1])}/>);
+      ret.push(<input key={valueMI[1] + "ColorInput"} className={`color${inputValue.isInherited ? " inherited" : ""}`} type='color' value={inputValue.value} onChange={handleMIchange} placeholder={placeholder}  title={t(valueMI[1])}/>);
       break;
     case MI_INPUT_TYPES.selector:
       const selectorOptions = options || ["", ""];
@@ -219,7 +244,7 @@ function Menuitem ({store, value, type, action, placeholder, fileType, columnSel
           return <option key={index} value={optionValue}>{t(title)}</option>;
         }
       });
-      ret.push(<select key={valueMI[1] + "SelectorInput"} onChange={handleMIchange} value={getInputValue()} title={valueMI[1]} >{selectorOptionsHTML}</select>);
+      ret.push(<select key={`${valueMI[1]} SelectorInput`} className={inputValue.isInherited ? "inherited" : ""} onChange={handleMIchange} value={inputValue.value} title={valueMI[1]} >{selectorOptionsHTML}</select>);
       break;
     case MI_INPUT_TYPES.button:
       let getButtonClass = (primary) => {
@@ -250,7 +275,7 @@ function Menuitem ({store, value, type, action, placeholder, fileType, columnSel
     return ret;
   };
   return (
-    <div className={"Menuitem " + getClasses()}>
+    <div className={`Menuitem ${getClasses()}`}>
       {getContent()}
     </div>
   );

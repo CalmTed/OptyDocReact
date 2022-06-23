@@ -2,7 +2,8 @@ import React from "react";
 import Block from "./Block";
 import t from "../local.ts";
 import actionTypes from "../constants/actionTypes";
-import {templateSizes, TAB_NAMES} from "../constants/app";
+import {templateSizes, TAB_NAMES, NO_BLOCK_SELECTED, NO_COPY_SELECTED, TAB_INDEXES} from "../constants/app";
+import {BLOCK_NO_PARENT} from "../constants/block";
 
 function Stack ({store}) {
   const stateNow = store.getState();
@@ -16,7 +17,7 @@ function Stack ({store}) {
       //for now show nothing
     }else{ //if there`re some children
       //show them
-      stateNow.template.children.filter(ch => { return ch.parentID === ""; }).forEach(childBlock => {
+      stateNow.template.children.filter(ch => { return ch.parentID === BLOCK_NO_PARENT; }).forEach(childBlock => {
         ret.push(<Block key={childBlock.uuid} blockData={childBlock} store={store}/>);
       });
     }
@@ -26,7 +27,7 @@ function Stack ({store}) {
     let ret = [];
     stateNow.copies.rows.forEach((row, ci) => {
       if(ci >= startFrom && ci < startFrom + perPage) {
-        stateNow.template.children.filter(ch => { return ch.parentID === ""; }).forEach(childBlock => {
+        stateNow.template.children.filter(ch => { return ch.parentID === BLOCK_NO_PARENT; }).forEach(childBlock => {
           ret.push(<Block key={`${childBlock.uuid}_${ci}`} blockData={childBlock} store={store} copyIndex={ci}/>);
         });
       }
@@ -77,10 +78,10 @@ function Stack ({store}) {
     if(e.target.classList.contains("Stack")) {
       if(stateNow.app.tabSelected === TAB_NAMES.edit) {
         store.dispatch({type:actionTypes.SELECTEDBLOCK_SET,
-          payload:""});
+          payload:NO_BLOCK_SELECTED});
       }else if(stateNow.app.tabSelected === TAB_NAMES.copy) {
         store.dispatch({type:actionTypes.SELECTEDCOPY_SET,
-          payload:""});
+          payload:NO_COPY_SELECTED});
       }
     }
         
@@ -120,7 +121,7 @@ function Stack ({store}) {
     return styleList;
   };
   return (
-    <div className="Stack" onClick={handleClick} onKeyPress={(e) => { e.key === "Enter" ? handleClick(e) : 0; }} tabIndex='8' style={getStyle(templateSizes, stateNow)}>
+    <div className="Stack" onClick={handleClick} onKeyPress={(e) => { e.key === "Enter" ? handleClick(e) : 0; }} tabIndex={TAB_INDEXES.stack} style={getStyle(templateSizes, stateNow)}>
       {generatePages()}
     </div>
   );

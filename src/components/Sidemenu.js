@@ -3,8 +3,8 @@ import Tab from "./Tab";
 import Menuitem from "./Menuitem";
 import actionTypes from "../constants/actionTypes";
 import t from "../local.ts";
-import {TAB_NAMES, tabOptions, MI_INPUT_TYPES, templateSizes, templateOrientations} from "../constants/app";
-import {BLOCK_STYLE_NAMES, BLOCK_STYLE_SETTINGS, BLOCK_VALUE_TYPE_OPTIONS} from "../constants/block";
+import {TAB_NAMES, tabOptions, MI_INPUT_TYPES, templateSizes, templateOrientations, NO_BLOCK_SELECTED, NO_COPY_SELECTED, TAB_INDEXES} from "../constants/app";
+import {BLOCK_STYLE_NAMES, BLOCK_CONTENT_TYPES, BLOCK_STYLE_SETTINGS, BLOCK_VALUE_TYPE_OPTIONS, BLOCK_NO_PARENT} from "../constants/block";
 
 function Sidemenu ({store}) {
   const stateNow = store.getState();
@@ -19,7 +19,7 @@ function Sidemenu ({store}) {
     };
     var blockSelectedChildrenList = [];
     var blockSelectedNeigborList = [];
-    if(stateNow.app.blockSelected === "" || !stateNow.template.children.length) {
+    if(stateNow.app.blockSelected === NO_BLOCK_SELECTED || !stateNow.template.children.length) {
       //TEMPLATE SETINGS
       // const pageSizeOptions = 
       let getTemplateSizesOptions = (templateSizes) => {
@@ -46,7 +46,7 @@ function Sidemenu ({store}) {
       ret.push(<Menuitem key='marginRight' store={store} value="template.marginRight" action={actionTypes.TEMPLATE_MARGIN_RIGHT_SET} type={ MI_INPUT_TYPES.size } placeholder="M right" />);
       
       stateNow.template.children.forEach(ch => {
-        if(ch.parentID === "") {
+        if(ch.parentID === BLOCK_NO_PARENT) {
           blockSelectedChildrenList.push(ch);
         }
       });
@@ -60,7 +60,7 @@ function Sidemenu ({store}) {
     }else{
       //SELECTED BLOCK SETTINGS
       const blockSelectedObject = stateNow.template.children.filter(ch => { return Number(ch.uuid) === Number(stateNow.app.blockSelected); })[0];
-      var blockSelectedParentObject = "";
+      var blockSelectedParentObject = BLOCK_NO_PARENT;
       stateNow.template.children.forEach(ch => {
         if(Number(ch.parentID) === Number(blockSelectedObject.uuid)) { //get all children
           blockSelectedChildrenList.push(ch);
@@ -77,7 +77,7 @@ function Sidemenu ({store}) {
         let navLinks = [];
         navLinks.push(<div key='name' className='blockName'>{t("Block: ")}{blockSelectedObject.humanfriendlyID}</div>);
     
-        if(blockSelectedParentObject !== "") {
+        if(blockSelectedParentObject !== BLOCK_NO_PARENT) {
           navLinks.push(<div key='parent' className='blockParent'>{t("Parent: ")}{createBlockLink(blockSelectedParentObject.uuid, blockSelectedParentObject.humanfriendlyID)}</div>);
         }
         if(blockSelectedNeigborList.length) {
@@ -109,6 +109,7 @@ function Sidemenu ({store}) {
           value= {"selectedBlock." + miData.value} 
           type={miData.type} 
           action={miData.action} 
+          dataList={miData.dataList}
           placeholder={miPlaceholder} 
           options={miOptions}
         />);
@@ -127,7 +128,7 @@ function Sidemenu ({store}) {
       genBlockMI({value:BLOCK_STYLE_NAMES.backgroundColor,
         type: MI_INPUT_TYPES.color,
         action:actionTypes.BLOCK_BACKGROUND_COLOR_SET});
-      if(blockSelectedObject.style.displayType !== "inline") {
+      if(blockSelectedObject.style.displayType !== "inline") { // TODO change to constant
         ret.push(<div className='spacer' key='spacerAlign' >{t("Align")}</div>);
         genBlockMI({value: BLOCK_STYLE_NAMES.alignVertical,
           type: MI_INPUT_TYPES.selector,
@@ -188,8 +189,8 @@ function Sidemenu ({store}) {
           action:actionTypes.BLOCK_VALUE_TYPE_SET,
           options:Object.values(BLOCK_VALUE_TYPE_OPTIONS)
         });
-        if(blockSelectedObject.valueType !== "copied") { //if block is not copying from another
-          if(blockSelectedObject.valueType !== "fixed") { //if value is variable
+        if(blockSelectedObject.valueType !== BLOCK_CONTENT_TYPES.copied) { //if block is not copying from another
+          if(blockSelectedObject.valueType !== BLOCK_CONTENT_TYPES.fixed) { //if value is variable
 
             genBlockMI({value:"variableTitle",
               type: MI_INPUT_TYPES.text,
@@ -203,17 +204,26 @@ function Sidemenu ({store}) {
               action:actionTypes.BLOCK_INNER_TEXT_SET});
           }
         }else{
-          //TODO check which copy channels exists 
+          //TODO check which copy channels exists
           const getLinksOptions = (stateNow, blockSelectedObject) => {
             //loop though the children and find ones not copying
-            return stateNow.template.children.filter(ch => { return ch.valueType !== "copied" || (ch.uuid === Number(blockSelectedObject.uuid)); }).map(ch => { return [ch.copyChannel,
-              ch.copyChannel]; });
+            return stateNow.template.children.filter(ch => {
+              return ch.valueType !== BLOCK_CONTENT_TYPES.copied || (ch.uuid !== Number(blockSelectedObject.uuid)); 
+            }).map(ch => {
+              return ch.copyChannel;
+            }).filter((value, index, self) => {
+              return (self.indexOf(value) >= index && value.length > 0) || false; 
+            }).map(ch => {
+              return [ch];
+            });
           };
           //show link if it is
-          genBlockMI({value:"copyChannel",
+          genBlockMI({
+            value:"copyChannel",
             type: MI_INPUT_TYPES.text,
             action:actionTypes.BLOCK_COPY_CHANNEL_SET,
-            options:getLinksOptions(stateNow, blockSelectedObject)});
+            dataList:getLinksOptions(stateNow, blockSelectedObject)
+          });
         }
       }
       ret.push(<div className='spacer' key='spacerCustomCSS' >{t("Custom CSS")}</div>);
@@ -237,25 +247,25 @@ function Sidemenu ({store}) {
         ret.push(<div className='spacer' key='spacerCopyList' >{t("Copy")}</div>);
         const copyOptions = () => {
           let copyOptions = [["Unselected",
-            ""]];
+            NO_COPY_SELECTED]];
           copyOptions = copyOptions.concat(stateNow.copies.rows.map((r, i) => {
-            return [t("Copy") + " " + i,
+            return [`${t("Copy")} ${i}`,
               i];
           }));
           return copyOptions;
         };
         ret.push(<Menuitem key='copySelector' store={store} value="app.copySelected" action={actionTypes.SELECTEDCOPY_SET} type={ MI_INPUT_TYPES.selector } fileType='csv' primary="true" title={t("Select CSV")} options={copyOptions()}/>);
         ret.push(<Menuitem key='addCopyRow' store={store} value="customAction.addCopyRow"  type={ MI_INPUT_TYPES.button }  title="" icon="add"/>);   
-        if(stateNow.app.copySelected + "" !== "") {
+        if(stateNow.app.copySelected !== NO_COPY_SELECTED) {
           ret.push(<Menuitem key='removeCopyRow' store={store} value="customAction.removeCopyRow"  type={ MI_INPUT_TYPES.button }  title="" icon="remove"/>);    
         }
-        if(stateNow.app.copySelected + "" !== "" && typeof stateNow.copies.rows[stateNow.app.copySelected] !== "undefined") {
+        if(stateNow.app.copySelected !== NO_COPY_SELECTED && typeof stateNow.copies.rows[stateNow.app.copySelected] !== "undefined") {
           stateNow.copies.columns.forEach((col) => {
             const getMiType  = (colType) => {
               switch(colType) {
-              case BLOCK_VALUE_TYPE_OPTIONS.variable[1]:
+              case BLOCK_VALUE_TYPE_OPTIONS.variable:
                 return MI_INPUT_TYPES.text;
-              case BLOCK_VALUE_TYPE_OPTIONS.selector[1]:
+              case BLOCK_VALUE_TYPE_OPTIONS.selector:
                 return MI_INPUT_TYPES.selector;
               default:
                 return MI_INPUT_TYPES.text;
@@ -269,7 +279,11 @@ function Sidemenu ({store}) {
             const getDataList = () => {
               const colId = stateNow.copies.columns.indexOf(stateNow.copies.columns.find(c => Number(c.target) === Number(col.target)));
               let datalist = [];
-              datalist = stateNow.copies.rows.map(row => row[colId]).filter((value, index, self) => { return (self.indexOf(value) === index && value?.length > 0) || false; });
+              datalist = stateNow.copies.rows.map(row => {
+                return row[colId];
+              }).filter((value, index, self) => {
+                return (self.indexOf(value) >= index && value?.length > 0) || false;
+              });
               return datalist;
             };
             ret.push(<div className='spacer' key={"spacerInput" + col.target} >{col.title}</div>);
@@ -314,7 +328,7 @@ function Sidemenu ({store}) {
       <div className='tabs'>
         {tabOptions.map(([tabTitle,
           tabValue], i) => {
-          return <Tab tabIndex={i + 1} key={tabValue} store={store} tabName={tabTitle} tabValue={tabValue}/>;
+          return <Tab tabIndex={i + TAB_INDEXES.tabs} key={tabValue} store={store} tabName={tabTitle} tabValue={tabValue}/>;
         })}
       </div>
       <div className='menuitems'>
