@@ -45,7 +45,7 @@ module.exports = {
     "max-lines-per-function": ["warn",
       200],
     "max-depth": ["error",
-      5],
+      7],
     "no-magic-numbers":["warn",
       {"ignoreArrayIndexes": true}],
     "no-underscore-dangle":["error",

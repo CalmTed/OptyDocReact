@@ -140,6 +140,10 @@ border: 1px solid transparent;
                 &.inherited:not(:focus){
                     opacity: 0.5;
                 }
+                option {
+                    background: var(--menu-backcolor);
+                    color: var(--block-backgroundColor);
+                }
             }
 
             input.size{
@@ -381,6 +385,19 @@ border: 1px solid transparent;
                 width: 100%;
                 align-content: inherit;
                 justify-content: inherit;
+            }
+            select, input{
+                color: inherit;
+                font-size: inherit;
+                background: transparent;
+                border: none;
+                margin: 0;
+                padding: 0;
+                option {
+                    background: var(--menu-backcolor);
+                    color:var(--block-backgroundColor);
+                }
+                max-width: var(--page-wrapper-width);
             }
         }
     }

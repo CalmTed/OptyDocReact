@@ -1,6 +1,6 @@
 import actionTypes from "../constants/actionTypes";
 import {templateOrientations, templateSizes} from "../constants/app";
-import {BLOCK_STYLE_NAMES, BLOCK_STYLE_SETTINGS, BLOCK_VALUE_TYPE_OPTIONS} from "../constants/block";
+import {BLOCK_STYLE_NAMES, BLOCK_STYLE_SETTINGS, BLOCK_CONTENT_TYPES} from "../constants/block";
 import {initialValuesTemplate, initialValuesBlock} from "../constants/initialValues";
 
 const genUUID = () => {
@@ -133,6 +133,12 @@ const templateReducer = (state = getinitialState(), action) => {
   case actionTypes.TEMPLATE_BLOCK_REMOVE:
     return returnMiddleware({...state,
       children:getNewChildrenList("blockRemove")});
+  case actionTypes.TEMPLATE_BLOCK_SPLIT:
+    //check if any textSelected
+    //check if blocks with selected text is linear
+    //
+    return returnMiddleware({...state,
+      children:getNewChildrenList("blockSplit")});
   case actionTypes.ZOOM_SET:
     //TODO make if functional for scroll
     if(action.payload >= 500) {
@@ -322,7 +328,8 @@ const templateReducer = (state = getinitialState(), action) => {
       return state;
     }
   case actionTypes.BLOCK_VALUE_TYPE_SET:
-    if(isValidOption(action.payload, Object.keys(BLOCK_VALUE_TYPE_OPTIONS))) {
+    console.log(action.payload, Object.values(BLOCK_CONTENT_TYPES));
+    if(isValidOption(action.payload, Object.values(BLOCK_CONTENT_TYPES))) {
       return returnMiddleware({...state,
         children:getNewChildrenList("valueType")});
     }else{

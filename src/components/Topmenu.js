@@ -9,6 +9,7 @@ function Topmenu ({store}) {
     if(stateNow.app.tabSelected === TAB_NAMES.edit) {
       ret.push(<Topbutton key='1' name='newBlock' store={store}></Topbutton>);
       ret.push(<Topbutton key='2' name='removeBlock' store={store}></Topbutton>);
+      ret.push(<Topbutton key='3' name='splitBlock' store={store}></Topbutton>);
     }
     return ret;
   };

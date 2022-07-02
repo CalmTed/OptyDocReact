@@ -10,6 +10,7 @@ const actionTypes = {
   TEMPLATE_NEW_TEMPLATE: "template/newTemplate",
   TEMPLATE_NEW_BLOCK_ADD:"template/newBlockAdd",
   TEMPLATE_BLOCK_REMOVE:"template/blockRemove",
+  TEMPLATE_BLOCK_SPLIT:"template/blockSplit",
   ZOOM_SET:"template/zoomSet",
   TEMPLATE_NAME_SET:"template/nameSet",
   TEMPLATE_PAGE_SIZE_SET:"template/pageSizeSet",

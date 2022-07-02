@@ -37,7 +37,8 @@ function Topbutton ({disabled = false, name, store}) {
     case "newBlock":
       store.dispatch({type:actionTypes.TEMPLATE_NEW_BLOCK_ADD,
         payload:"",
-        blockSelected:blockSelected});
+        blockSelected:blockSelected
+      });
       break;
     case "removeBlock":
       store.dispatch({
@@ -46,7 +47,14 @@ function Topbutton ({disabled = false, name, store}) {
       });
       store.dispatch({type:actionTypes.TEMPLATE_BLOCK_REMOVE,
         payload:"",
-        blockSelected:blockSelected});
+        blockSelected:blockSelected
+      });
+      break;
+    case "splitBlock":
+      store.dispatch({
+        type:actionTypes.TEMPLATE_BLOCK_SPLIT,
+        blockSelected:blockSelected
+      });
       break;
     case "newTemplate":
       const setNewTemp = () => {

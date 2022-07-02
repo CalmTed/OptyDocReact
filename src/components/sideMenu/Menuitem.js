@@ -1,11 +1,18 @@
 import React from "react";
-import Icon from "./Icon";
-import t from "../local.ts";
-import actionTypes from "../constants/actionTypes";
-import {TAB_NAMES, MI_INPUT_TYPES, NO_BLOCK_SELECTED} from "../constants/app";
-import {BLOCK_INHERIT, BLOCK_CONTENT_TYPES, BLOCK_NO_PARENT} from "../constants/block";
-import {exportCSVFile, importCSVFile} from "../utils/handleCSVFile";
-import {recreateCopiesTitles} from "../utils/handleCopyesTable";
+import Icon from "../Icon";
+import t from "../../local.ts";
+import actionTypes from "../../constants/actionTypes";
+import {TAB_NAMES, MI_INPUT_TYPES, NO_BLOCK_SELECTED} from "../../constants/app";
+import {BLOCK_INHERIT, BLOCK_CONTENT_TYPES, BLOCK_NO_PARENT} from "../../constants/block";
+import {exportCSVFile, importCSVFile} from "../../utils/handleCSVFile";
+import {recreateCopiesTitles} from "../../utils/handleCopyesTable";
+import TextInput from "../Inputs/TextInput";
+import TextareaInput from "../Inputs/TextareaInput";
+import SizeInput from "../Inputs/SizeInput";
+import ColorInput from "../Inputs/ColorInput";
+import SelectInput from "../Inputs/SelectInput";
+import ButtonInput from "../Inputs/ButtonInput";
+import FileInput from "../Inputs/FileInput";
 
 function Menuitem ({store, value, type, action, placeholder, fileType, columnSelected, icon, primary, title, options, dataList}) {
   const stateNow = store.getState();
@@ -159,7 +166,6 @@ function Menuitem ({store, value, type, action, placeholder, fileType, columnSel
     let getInputValue = () => {
       let ret = "";
       let isInherited = false;
-      
       if(valueMI[0] === "selectedBlock") {
         //search for needed block
         let selectedBlockID = stateNow.app.blockSelected;
@@ -212,64 +218,79 @@ function Menuitem ({store, value, type, action, placeholder, fileType, columnSel
         isInherited
       };
     };
-    const getDataListOptions = (dataList = []) => {
-      const dataListOptions = dataList.map(option => <option key={`${option}_option`} value={option}></option>);
-      return dataListOptions;
-    };
     const inputValue = getInputValue() || [];
     switch(type) {
     case MI_INPUT_TYPES.text:
-      ret.push(<div key={valueMI[1] + "textInputWrapper"} >
-        <input key={valueMI[1] + "TextInput"} className={inputValue.isInherited ? "inherited" : ""} list={valueMI[1] + "TextInputList"} value={inputValue.value} onChange={handleMIchange} placeholder={placeholder} title={t(valueMI[1])}/>
-        <datalist key= {valueMI[1] + "TextInputListKey"} id={valueMI[1] + "TextInputList"}>{getDataListOptions(dataList)}</datalist>
-      </div>);
+      ret.push(<TextInput 
+        target={valueMI[1]}
+        key={valueMI[1] + "textInputWrapper"}
+        className={inputValue.isInherited ? "inherited" : ""}
+        value={inputValue.value || ""}
+        onChange={handleMIchange}
+        placeholder={placeholder}
+        title={t(valueMI[1])}
+        dataList={dataList}
+      />);
       break;
     case MI_INPUT_TYPES.textarea:
-      ret.push(<textarea key={valueMI[1] + "TextareaInput"} className={`textarea${inputValue.isInherited ? " inherited" : ""}`} value={inputValue.value} onChange={handleMIchange} placeholder={placeholder} title={t(valueMI[1])}></textarea>);
+      ret.push(<TextareaInput 
+        key={valueMI[1] + "TextareaInput"}
+        className={`textarea${inputValue.isInherited ? " inherited" : ""}`}
+        value={inputValue.value}
+        onChange={handleMIchange}
+        placeholder={placeholder}
+        title={t(valueMI[1])}
+      />);
       break;
     case MI_INPUT_TYPES.size:
-      ret.push(<input key={valueMI[1] + "SizeInput"} className={`size${inputValue.isInherited ? " inherited" : ""}`} value={inputValue.value} onChange={handleMIchange} placeholder={placeholder}  title={t(valueMI[1])}/>);
+      ret.push(<SizeInput
+        key={valueMI[1] + "SizeInput"}
+        className={`size${inputValue.isInherited ? " inherited" : ""}`}
+        value={inputValue.value}
+        onChange={handleMIchange}
+        placeholder={placeholder}
+        title={t(valueMI[1])}
+      />);
       break;
     case MI_INPUT_TYPES.color:
-      ret.push(<input key={valueMI[1] + "ColorInput"} className={`color${inputValue.isInherited ? " inherited" : ""}`} type='color' value={inputValue.value} onChange={handleMIchange} placeholder={placeholder}  title={t(valueMI[1])}/>);
+      ret.push(<ColorInput 
+        key={valueMI[1] + "ColorInput"}
+        className={`color${inputValue.isInherited ? " inherited" : ""}`}
+        value={inputValue.value}
+        onChange={handleMIchange}
+        placeholder={placeholder}
+        title={t(valueMI[1])}
+      />);
       break;
     case MI_INPUT_TYPES.selector:
-      const selectorOptions = options || ["", ""];
-      let selectorOptionsHTML = selectorOptions.map(([title,
-        optionValue], index) => {
-        //check if we need to translate
-        if(valueMI[0] === "selectedCopy") {
-          return <option key={index} value={optionValue}>{title}</option>;
-        }else{
-          return <option key={index} value={optionValue}>{t(title)}</option>;
-        }
-      });
-      ret.push(<select key={`${valueMI[1]} SelectorInput`} className={inputValue.isInherited ? "inherited" : ""} onChange={handleMIchange} value={inputValue.value} title={valueMI[1]} >{selectorOptionsHTML}</select>);
+      ret.push(<SelectInput
+        key={`${valueMI[1]} SelectorInput`}
+        target={valueMI[1]}
+        className={inputValue.isInherited ? "inherited" : ""}
+        onChange={handleMIchange}
+        value={inputValue.value}
+        title={valueMI[1]}
+        options={options}
+      />);
       break;
     case MI_INPUT_TYPES.button:
-      let getButtonClass = (primary) => {
-        let buttonClass = "";
-        primary ? buttonClass += "primary" : buttonClass += "";
-        return buttonClass;
-      };
-      let getButtonTitle = (title) => {
-        let buttonTitle = [];
-        title ? buttonTitle.push(<span key='buttonTitle'>{title}</span>) :  false;
-        return buttonTitle;
-      };
-      ret.push(<button className={getButtonClass(primary)} key={valueMI[1]} onClick={handleMIchange} title={valueMI[1]} ><Icon image={icon} store={store}/>{getButtonTitle(title)}</button>);
+      ret.push(<ButtonInput
+        key={valueMI[1]}
+        primary={primary}
+        onClick={handleMIchange}
+        title={title}
+        icon={<Icon image={icon} store={store}/>}
+      />);
       break;
     case MI_INPUT_TYPES.file:
-      const getTitle = (title) => {
-        let inputTitle = [];
-        title ? inputTitle.push(<span key='title'>{title}</span>) :  false;
-        return inputTitle;
-      };
-      ret.push(<label className='fileinput' key={valueMI[1] + "Label"} title={valueMI[1]} >
-        <Icon image={icon} store={store}/>
-        {getTitle(title)}
-        <input key={valueMI[1] + "hiddenInput"} type='file' style={{"display":"none"}} onChange={handleMIchange} accept=".csv"/>
-      </label>);
+      ret.push(<FileInput
+        key={value[1]}
+        target={valueMI[1]}
+        onChange={handleMIchange}
+        accept=".csv"
+        icon={<Icon image={icon} store={store}/>}
+        title={title}
+      />);
       break;
     }
     return ret;

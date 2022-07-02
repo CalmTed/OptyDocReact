@@ -45,8 +45,8 @@ export const MI_INPUT_TYPES = {
   button:"button"
 };
 
-export const NO_BLOCK_SELECTED = null;
-export const NO_COPY_SELECTED = null;
+export const NO_BLOCK_SELECTED = "none";
+export const NO_COPY_SELECTED = "none";
 
 export const TAB_INDEXES = {
   tabs: 1,

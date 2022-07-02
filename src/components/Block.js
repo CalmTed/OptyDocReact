@@ -77,7 +77,7 @@ function Block ({store, blockData, copyIndex}) {
             ret = [...formatInnerText(referenceObject.innerText)];
           }
         }else{ //3
-          ret = [...formatInnerText(referenceObject.innerText)]; 
+          ret = [...formatInnerText(referenceObject.innerText.split("\n")[0])]; 
         }
       }else{
         if(isCopyIndexed) {
@@ -86,7 +86,63 @@ function Block ({store, blockData, copyIndex}) {
           //add selector if just have options
           //add input(?) if text
           if(blockData.valueType !== BLOCK_CONTENT_TYPES.fixed) {
-            ret = [...formatInnerText(getTextFromCopyRows(stateNow, blockData.uuid, copyIndex))];
+            if(stateNow.app.tabSelected === TAB_NAMES.copy) {
+              const getSelectorBlockOptions = (text) => {
+                return text.split("\n").map((line) => { return <option key={`${line}_option`}>{line}</option>; });
+              };
+              const handleVariableBlockChange = (e) => {
+                handleChange(e);
+              };
+              switch(blockData.valueType) {
+              //TODO deside how to make it
+              //the conflict is that:
+              //- input doesn't have normal sizing to words
+              //- content editable doesn't rerender how it should be
+              // case BLOCK_CONTENT_TYPES.variable:
+              //   ret.push(
+              //     <div
+              //       contentEditable 
+              //       id={blockData.uuid + "_" + copyIndex}
+              //       key={`${blockData.uuid}_input`}
+              //       // type="text"
+              //       // value=
+              //       onKeyUp={handleVariableBlockChange}
+              //       // style={{
+              //       //   "width": `calc( ${getTextFromCopyRows(stateNow, blockData.uuid, copyIndex).length} * .65rem)`
+              //       // }}
+              //       innerText={getTextFromCopyRows(stateNow, blockData.uuid, copyIndex)}
+              //     >
+              //     </div>);
+              //    <input 
+              //       id={blockData.uuid + "_" + copyIndex}
+              //       key={`${blockData.uuid}_input`}
+              //       type="text"
+              //       onKeyUp={handleVariableBlockChange}
+              //       style={{
+              //         "width": `calc( ${getTextFromCopyRows(stateNow, blockData.uuid, copyIndex).length} * .65rem)`
+              //       }}
+              //       value={getTextFromCopyRows(stateNow, blockData.uuid, copyIndex)}
+              //     />);
+              //   break;
+              case BLOCK_CONTENT_TYPES.selector:
+                ret.push(
+                  <select
+                    id={blockData.uuid + "_" + copyIndex}
+                    key={`${blockData.uuid}_select`}
+                    onChange={handleVariableBlockChange}
+                    value={getTextFromCopyRows(stateNow, blockData.uuid, copyIndex)}
+                  >
+                    {getSelectorBlockOptions(blockData.innerText)}
+                  </select>);
+                break;
+              default:
+                ret = [...formatInnerText(getTextFromCopyRows(stateNow, blockData.uuid, copyIndex))];
+              }
+
+            }else {
+              ret = [...formatInnerText(getTextFromCopyRows(stateNow, blockData.uuid, copyIndex))];
+            }
+            
           }else{
             ret = [...formatInnerText(blockData.innerText)];
           }
@@ -112,7 +168,7 @@ function Block ({store, blockData, copyIndex}) {
     let blockStyle = blockData.style;
     let blockOutline = "";
     //showing selected block
-    if(blockData.blockUUID === appState.blockSelected && appState.tabSelected === TAB_NAMES.edit) {
+    if(blockData.uuid + "" === appState.blockSelected + "" && appState.tabSelected + "" === TAB_NAMES.edit + "") {
       blockOutline = "var(--selected-border)";
     }
     //showing selected copy
@@ -180,6 +236,15 @@ function Block ({store, blockData, copyIndex}) {
         
     return constructedStyle;
   };
+  const handleChange = async (e) => {
+    if(blockData.uuid + "_" + copyIndex === e.target.id && stateNow.app.tabSelected === TAB_NAMES.copy) {
+      await store.dispatch({
+        type:actionTypes.COPIES_ROW_SET,
+        payload:e.target.value,
+        copySelected:stateNow.app.copySelected,
+        columnSelected:blockData.uuid + ""});
+    }
+  };
   const handleClick = (e) => {
     //selectBlock
     //TO DO if it is not a parent
@@ -192,6 +257,11 @@ function Block ({store, blockData, copyIndex}) {
       store.dispatch({type:actionTypes.SELECTEDCOPY_SET,
         payload:copyIndex});            
     }
+    //if editing if selected(and divided only selected block, not all block, not several blocks)
+    //if selected is inline 
+    //then save text to selected text
+    //and remove that taxt on changing  
+    // console.log(window.getSelection().toString());
   };
   const handleKeyPress = (e) => {
     e.key === "Enter" ? handleClick(e) : false;

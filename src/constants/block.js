@@ -190,20 +190,20 @@ export const BLOCK_STYLE_SETTINGS = {
 };
 
 export const BLOCK_VALUE_TYPE_OPTIONS = {
-  [BLOCK_CONTENT_TYPES.fixed]: [
+  "fixed": [
     "Fixed",
     BLOCK_CONTENT_TYPES.fixed
   ],
-  [BLOCK_CONTENT_TYPES.variable]:[
+  "variable":[
     "Variable",
     BLOCK_CONTENT_TYPES.variable
   ],
-  [BLOCK_CONTENT_TYPES.selector]: [
-    "Selector",  
+  "selector": [
+    "Selector",
     BLOCK_CONTENT_TYPES.selector
   ],
-  [BLOCK_CONTENT_TYPES.copied]: [
-    "Copy from",  
+  "copied": [
+    "Copy from",
     BLOCK_CONTENT_TYPES.copied
   ]
 };
