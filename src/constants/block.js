@@ -21,7 +21,7 @@ export const BLOCK_STYLE_NAMES = {
 };
 
 export const BLOCK_INHERIT = "inherit";
-export const BLOCK_NO_PARENT = null;
+export const BLOCK_NO_PARENT = "none";
 
 export const BLOCK_CONTENT_TYPES = {
   fixed: "fixed1",

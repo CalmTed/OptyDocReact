@@ -19,10 +19,12 @@ function CopyStack ({
     });
     return ret;
   };
-  if(fitsOnPage > 0 && pagesNeeded > 1) {
+  if(fitsOnPage > 0 && pagesNeeded > 1) { 
+    let ret = [];
     for(let copyPageIndex = 0; copyPageIndex < pagesNeeded; copyPageIndex++) {
-      return <div key={"copyPage" + copyPageIndex} className="PageWrapper"><div className="PageInner">{getCopies(fitsOnPage * copyPageIndex, fitsOnPage)}</div></div>;
+      ret.push(<div key={"copyPage" + copyPageIndex} className="PageWrapper"><div className="PageInner">{getCopies(fitsOnPage * copyPageIndex, fitsOnPage)}</div></div>);
     }
+    return ret;
   }else{
     return <div key="1" className="PageWrapper"><div className="PageInner">{getCopies()}</div></div>;
   }

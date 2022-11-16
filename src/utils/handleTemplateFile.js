@@ -62,9 +62,10 @@ export const importTemplateFile = (file, version, successCallback = (templateDat
     let valid = true;
     //check checksum
     if(templateData.checksum !== getCheckSum(fileText.replace(/,"checksum":\d{1,10}/, ""))) {
-      valid = false;
-      errorCallback("invalid checksum");
-      return;
+      // valid = false;
+      // errorCallback("invalid checksum");
+      // return;
+      console.warn("wrong checksum", templateData.checksum, getCheckSum(fileText.replace(/,"checksum":\d{1,10}/, "")));
     }
     //check version
     if(templateData.version !== version) {
